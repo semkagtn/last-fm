@@ -1,0 +1,23 @@
+drop database last_fm;
+create database last_fm;
+use last_fm;
+
+create table users (
+    user_id int not null primary key,
+    age int not null,
+    gender enum('m', 'f', 'n') not null,
+    country char(2) not null,
+    playcount int not null
+);
+
+create table recent_tracks (
+    recent_track_id int not null primary key auto_increment,
+    artist varchar(255) not null,
+    album varchar(511) not null,
+    track varchar(255) not null,
+    listened_when datetime not null,
+    user_id int not null,
+    foreign key (user_id) references users(user_id)
+);
+
+create index recent_tracks__user_id on recent_tracks(user_id);
