@@ -9,7 +9,11 @@
         <property name="hibernate.connection.url">jdbc:mysql://localhost/last_fm</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <mapping class="com.semkagtn.lastfm.ArtistsTags" />
         <mapping class="com.semkagtn.lastfm.RecentTracks" />
+        <mapping class="com.semkagtn.lastfm.TopArtists" />
         <mapping class="com.semkagtn.lastfm.Users" />
+        <mapping class="com.semkagtn.lastfm.Tags" />
+        <mapping class="com.semkagtn.lastfm.Artists" />
     </session-factory>
 </hibernate-configuration>

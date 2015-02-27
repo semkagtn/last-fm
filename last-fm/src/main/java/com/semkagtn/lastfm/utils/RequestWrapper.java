@@ -2,8 +2,6 @@ package com.semkagtn.lastfm.utils;
 
 import de.umass.lastfm.CallException;
 
-import java.util.function.BiFunction;
-
 /**
  * Created by semkagtn on 2/14/15.
  */
@@ -11,7 +9,7 @@ public class RequestWrapper {
 
     private static final int REQUEST_REPEATS = 2;
 
-    public static <A1, A2, R> R request(BiFunction<A1, A2, R> request,
+    public static <A1, A2, R> R request(TwoFunction<A1, A2, R> request,
                                         A1 arg1, A2 arg2)
             throws RequestException {
         int repeats = 0;
@@ -109,6 +107,11 @@ public class RequestWrapper {
             }
         } while (!responseReceived);
         return response;
+    }
+
+    @FunctionalInterface
+    public interface TwoFunction<A1, A2, R> {
+        R apply(A1 arg1, A2 arg2);
     }
 
     @FunctionalInterface
