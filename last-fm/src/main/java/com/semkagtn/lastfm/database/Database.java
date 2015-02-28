@@ -1,6 +1,5 @@
 package com.semkagtn.lastfm.database;
 
-import com.semkagtn.lastfm.utils.Utils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

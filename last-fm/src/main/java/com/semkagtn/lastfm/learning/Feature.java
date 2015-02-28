@@ -1,4 +1,4 @@
-package com.semkagtn.lastfm.features;
+package com.semkagtn.lastfm.learning;
 
 import com.semkagtn.lastfm.Users;
 import weka.core.Attribute;

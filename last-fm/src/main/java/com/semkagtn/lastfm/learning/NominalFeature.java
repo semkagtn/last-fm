@@ -1,4 +1,4 @@
-package com.semkagtn.lastfm.features;
+package com.semkagtn.lastfm.learning;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
