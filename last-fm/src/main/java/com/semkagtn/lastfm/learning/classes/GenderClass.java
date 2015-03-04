@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class GenderClass extends NominalFeature {
 
     public GenderClass() {
-        super("gender", Arrays.asList("m", "f", "n"));
+        super("gender", Arrays.asList("m", "f"));
     }
 
     @Override

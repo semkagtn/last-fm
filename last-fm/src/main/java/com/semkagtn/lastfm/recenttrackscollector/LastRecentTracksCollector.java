@@ -15,6 +15,8 @@ import static com.semkagtn.lastfm.utils.RequestWrapper.request;
  */
 public class LastRecentTracksCollector implements RecentTracksCollector {
 
+    private static final int REQUEST_LIMIT = 200;
+
     private final int limit;
     private final String apiKey;
 
@@ -25,8 +27,15 @@ public class LastRecentTracksCollector implements RecentTracksCollector {
 
     @Override
     public List<Track> collect(int userId) throws RequestWrapper.RequestException {
-        Collection<Track> tracks =
-                request(User::getRecentTracks, String.valueOf(userId), 0, limit, apiKey).getPageResults();
-        return new ArrayList<>(tracks);
+        List<Track> result = new ArrayList<>();
+        int tracksLeft = limit;
+        while (tracksLeft > 0) {
+            int tracksCount = Math.min(tracksLeft, REQUEST_LIMIT);
+            Collection<Track> tracks =
+                    request(User::getRecentTracks, String.valueOf(userId), 0, tracksCount, apiKey).getPageResults();
+            result.addAll(tracks);
+            tracksLeft -= tracksCount;
+        }
+        return result;
     }
 }

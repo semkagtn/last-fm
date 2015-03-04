@@ -11,7 +11,8 @@
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <mapping class="com.semkagtn.lastfm.ArtistsTags" />
         <mapping class="com.semkagtn.lastfm.RecentTracks" />
-        <mapping class="com.semkagtn.lastfm.TopArtists" />
+        <mapping class="com.semkagtn.lastfm.Tracks" />
+        <mapping class="com.semkagtn.lastfm.TrackTags" />
         <mapping class="com.semkagtn.lastfm.Users" />
         <mapping class="com.semkagtn.lastfm.Tags" />
         <mapping class="com.semkagtn.lastfm.Artists" />

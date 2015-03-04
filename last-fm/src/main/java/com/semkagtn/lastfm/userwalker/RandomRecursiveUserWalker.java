@@ -23,15 +23,10 @@ public class RandomRecursiveUserWalker implements UserWalker {
     private final int friendsLimit;
     private final String apiKey;
 
-    public RandomRecursiveUserWalker(List<Integer> visitedIds, int depth, int friendsLimit, String apiKey) {
-        this.visitedUsers.addAll(visitedIds);
+    public RandomRecursiveUserWalker(int depth, int friendsLimit, String apiKey) {
         this.depth = depth;
         this.friendsLimit = friendsLimit;
         this.apiKey = apiKey;
-    }
-
-    public RandomRecursiveUserWalker(int depth, int friendsLimit, String apiKey) {
-        this(new ArrayList<>(), depth, friendsLimit, apiKey);
     }
 
     @Override

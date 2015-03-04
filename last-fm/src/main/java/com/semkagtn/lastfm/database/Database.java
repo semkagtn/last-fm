@@ -8,22 +8,19 @@ import org.hibernate.cfg.Configuration;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by semkagtn on 2/16/15.
  */
 public class Database {
 
-    private static Session session;
     private static SessionFactory sessionFactory;
+    private static Session session;
 
     public static void open() {
         Configuration configuration = new Configuration().configure();
-//        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-//                .applySettings(configuration.getProperties())
-//                .build();
-        sessionFactory = configuration.buildSessionFactory(/*serviceRegistry*/);
+        sessionFactory = configuration.buildSessionFactory();
         session = sessionFactory.openSession();
     }
 
@@ -33,7 +30,14 @@ public class Database {
     }
 
     public static <T> List<T> select(Class<T> clazz) {
-        return session.createCriteria(clazz).list();
+        List<T> result = session.createCriteria(clazz).list();
+        return result;
+    }
+
+    public static <T> List<T> select(Class<T> clazz, String condition) {
+        Query query = session.createQuery("from " + clazz.getSimpleName() + " where " + condition);
+        List<T> result = query.list();
+        return result;
     }
 
     public static <T> void insert(T object) {
@@ -42,50 +46,69 @@ public class Database {
         session.getTransaction().commit();
     }
 
-    public static <T> boolean objectExists(T object) {
+    public static <T> boolean insertIfNotExists(T object, String... uniqueFields) {
+        session.beginTransaction();
+        boolean isExists = objectExists(object, uniqueFields);
+        if (!isExists) {
+            session.save(object);
+        }
+        session.getTransaction().commit();
+        return !isExists;
+    }
+
+    private static <T> boolean objectExists(T object, String... uniqueFields) {
+        Set<String> uniqueFieldsSet = new TreeSet<>(Arrays.asList(uniqueFields));
+        Map<String, Object> columnValue = new TreeMap<>();
         Class<?> clazz = object.getClass();
-        String queryBuilder = "from " + clazz.getSimpleName() + " where ";
+        String idName = null;
         String getIdMethodName = null;
         String setIdMethodName = null;
-        boolean uniqueValueExists = false;
+        String queryString = "from " + clazz.getSimpleName() + " where ";
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.isAnnotationPresent(Column.class)) {
+                Column column = method.getAnnotation(Column.class);
+                String columnName = column.name();
+                if (uniqueFieldsSet.contains(columnName)) {
+                    try {
+                        Object value = method.invoke(object);
+                        columnValue.put(columnName, value);
+                    } catch (Exception e) {
+                        terminateWithError(e);
+                    }
+                }
                 if (method.isAnnotationPresent(Id.class)) {
+                    idName = columnName;
                     getIdMethodName = method.getName();
                     setIdMethodName = method.getName().replaceFirst("get", "set");
-                } else {
-                    Column column = method.getAnnotation(Column.class);
-                    if (column.unique()) {
-                        uniqueValueExists = true;
-                        String name = column.name();
-                        Object value = null;
-                        try {
-                            value = method.invoke(object);
-                        } catch (Exception e) {
-                            terminateWithError(e);
-                        }
-                        queryBuilder += name + " = '" + escapeSingleQuotes(value.toString()) + "'";
-                    }
                 }
             }
         }
-        if (!uniqueValueExists) {
-            terminateWithError(new RuntimeException("Entity " + clazz + " doesn't have unique fields"));
-        }
-        Query query = session.createQuery(queryBuilder);
-        List<T> savedObjects = query.list();
-        if (savedObjects.size() > 0) {
-            T savedObject = savedObjects.get(0);
-            try {
-                Method setIdMethod = clazz.getMethod(setIdMethodName, Integer.class);
-                Method getIdMethod = clazz.getMethod(getIdMethodName);
-                setIdMethod.invoke(object, getIdMethod.invoke(savedObject));
-            } catch (Exception e) {
-                terminateWithError(e);
+        queryString += columnValue.entrySet()
+                .stream()
+                .map(x -> x.getKey() + " = '" + escapeSingleQuotes(x.getValue().toString()) + "'")
+                .reduce((x, y) -> x + " and " + y)
+                .get();
+        Query query = session.createQuery(queryString);
+        List<T> objects = query.list();
+        if (objects.size() > 0) {
+            if (!uniqueFieldsSet.contains(idName)) {
+                try {
+                    Method getIdMethod = clazz.getMethod(getIdMethodName);
+                    Method setIdMethod = clazz.getMethod(setIdMethodName, Integer.class);
+                    T savedObject = objects.get(0);
+                    Integer id = (Integer) getIdMethod.invoke(savedObject);
+                    setIdMethod.invoke(object, id);
+                } catch (Exception e) {
+                    terminateWithError(e);
+                }
             }
             return true;
         }
         return false;
+    }
+
+    private static String escapeSingleQuotes(String tagName) {
+        return tagName.replaceAll("'", "''");
     }
 
     private static void terminateWithError(Exception e) {
@@ -93,10 +116,6 @@ public class Database {
         System.err.println("Something goes wrong :(");
         e.printStackTrace();
         System.exit(1);
-    }
-
-    private static String escapeSingleQuotes(String tagName) {
-        return tagName.replaceAll("'", "''");
     }
 
     private Database() {

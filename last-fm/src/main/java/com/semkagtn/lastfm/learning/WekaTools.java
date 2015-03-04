@@ -24,14 +24,7 @@ public class WekaTools {
         return instances;
     }
 
-    public static void writeArffFile(Instances instances, File file) throws IOException {
-        ArffSaver saver = new ArffSaver();
-        saver.setInstances(instances);
-        saver.setFile(file);
-        saver.writeBatch();
-    }
-
-    public static Instances createInstances(DataSet dataSet, Features features, NominalFeature clazz) {
+    public static void writeArffFile(DataSet dataSet, Features features, NominalFeature clazz) throws IOException {
         List<NominalFeature> nominalFeatures = features.getNominalFeatures();
         List<NumericFeature> numericFeatures = features.getNumericFeatures();
         List<Users> users = dataSet.getUsers();
@@ -58,7 +51,10 @@ public class WekaTools {
             instance.setValue(clazz.getAttribute(), clazz.calculate(user));
             instances.add(instance);
         }
-        return instances;
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(instances);
+        saver.setFile(new File(dataSet.getName() + ".arff"));
+        saver.writeBatch();
     }
 
     private WekaTools() {
