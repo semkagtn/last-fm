@@ -7,7 +7,10 @@ import com.semkagtn.lastfm.userwalker.RandomRecursiveUserWalker;
 import com.semkagtn.lastfm.userwalker.UserWalker;
 import com.semkagtn.lastfm.utils.RequestWrapper;
 import com.semkagtn.lastfm.utils.Utils;
-import de.umass.lastfm.*;
+import de.umass.lastfm.Artist;
+import de.umass.lastfm.Tag;
+import de.umass.lastfm.Track;
+import de.umass.lastfm.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,9 +23,11 @@ import static com.semkagtn.lastfm.utils.RequestWrapper.request;
 public class CollectData {
 
     private static final int USER_WALKER_DEPTH = 2;
-    private static final int FRIENDS_LIMIT = 15;
+    private static final int FRIENDS_LIMIT = 5;
+    private static final int ARTIST_TAGS_LIMIT = 5;
+    private static final int TRACK_TAGS_LIMIT = 5;
     private static final int RECENT_TRACKS_LIMIT = 600;
-    private static final int TAGS_LIMIT = 5;
+    private static final int RECENT_TRACKS_MINIMUM = RECENT_TRACKS_LIMIT / 5;
 
     private static String[] apiKeys = new String[]{
             "b8b099d24df9c92133b729ac71ba0478",
@@ -48,92 +53,108 @@ public class CollectData {
     };
 
     public static void main(String[] args) {
-//        Caller.getInstance().setCache(null);
-//
-//        String apiKey = apiKeys[Integer.valueOf(args[0])];
-//        int usersAmount = Integer.valueOf(args[1]);
-//
-//        Database.open();
-//
-//        UserWalker userWalker = new RandomRecursiveUserWalker(USER_WALKER_DEPTH, FRIENDS_LIMIT, apiKey);
-//        RecentTracksCollector recentTracksCollector = new LastRecentTracksCollector(RECENT_TRACKS_LIMIT, apiKey);
-//
-//        for (int i = 0; i < usersAmount; i++) {
-//            User user;
-//            int userId;
-//            List<Track> recentTracks;
-//            try {
-//                user = userWalker.nextUser();
-//                if (user.getPlaycount() < RECENT_TRACKS_LIMIT) {
-//                    i--; // Bad user. Try to get another.
-//                    continue;
-//                }
-//                userId = Integer.valueOf(user.getId());
-//                recentTracks = recentTracksCollector.collect(userId);
-//            } catch (RequestWrapper.RequestException e) {
-//                i--; // Bad user. Try to get another.
-//                continue;
-//            }
-//            Users userEntity = new Users(userId, user.getAge(),
-//                    !user.getGender().equals("") ? user.getGender() : "n",
-//                    user.getCountry(), user.getPlaycount());
-//            boolean userInserted = Database.insertIfNotExists(userEntity);
-//            if (!userInserted) {
-//                i--; // User exists. Try to get another.
-//                continue;
-//            }
-//            for (Track recentTrack : recentTracks) {
-//                Artists artistEntity = new Artists(recentTrack.getArtist(), 0, 0);
-//                try {
-//                    insertArtistWithTags(artistEntity, apiKey);
-//                } catch (RequestWrapper.RequestException e) {
-//                    continue; // Bad artist. Skip this track.
-//                }
-//                RecentTracks recentTrackEntity = new RecentTracks(artistEntity, userEntity,
-//                        recentTrack.getName(), Utils.dateToString(recentTrack.getPlayedWhen()));
-//                Database.insert(recentTrackEntity);
-//            }
-//        }
-//
-//        Database.close();
+        String apiKey = apiKeys[Integer.valueOf(args[0])];
+        int usersAmount = Integer.valueOf(args[1]);
+
+        UserWalker userWalker = new RandomRecursiveUserWalker(USER_WALKER_DEPTH, FRIENDS_LIMIT, apiKey);
+        RecentTracksCollector tracksCollector = new LastRecentTracksCollector(RECENT_TRACKS_LIMIT, apiKey);
+        Database.open();
+        for (int i = 0; i < usersAmount; i++) {
+            User user;
+            try {
+                user = userWalker.nextUser();
+            } catch (RequestWrapper.RequestException e) {
+                i--;
+                continue; // Can't parse user. Try to get another user.
+            }
+            String gender = user.getGender().equals("") ? "n" : user.getGender();
+            if (user.getPlaycount() < RECENT_TRACKS_MINIMUM || gender.equals("n") && user.getAge() < 0) {
+                i--;
+                continue; // Uninformative user. Try to get another.
+            }
+            int userId = Integer.valueOf(user.getId());
+
+            List<Track> tracks;
+            try {
+                tracks = tracksCollector.collect(userId);
+            } catch (RequestWrapper.RequestException e) {
+                i--;
+                continue; // Can't parse recent tracks. Try to get another user;
+            }
+
+            Users userEntity = new Users(
+                    userId, user.getAge(), user.getGender(), user.getCountry(), user.getPlaycount());
+            boolean userInserted = Database.insertIfNotExists(userEntity, "user_id");
+            if (!userInserted) {
+                i--;
+                continue; // User exists. Try to get another.
+            }
+
+            for (Track recentTrack : tracks) {
+                Artist artist;
+                Track track;
+                try {
+                    artist = request(Artist::getInfo, recentTrack.getArtist(), apiKey);
+                    track = request(Track::getInfo, recentTrack.getArtist(), recentTrack.getName(), apiKey);
+                } catch (RequestWrapper.RequestException e) {
+                    continue; // Can't parse artist or track info. Skip this recent track.
+                }
+                Artists artistEntity = insertArtistWithTags(artist, apiKey);
+                Tracks trackEntity = insertTrackWithTags(track, artistEntity, apiKey);
+                RecentTracks recentTrackEntity = new RecentTracks(
+                        artistEntity, userEntity, trackEntity, Utils.dateToString(recentTrack.getPlayedWhen()));
+                Database.insert(recentTrackEntity);
+            }
+        }
+        Database.close();
     }
 
-    private static void insertArtistWithTags(Artists artistEntity, String apiKey)
-            throws RequestWrapper.RequestException {
-//        Artist artist;
-//        artist = request(Artist::getInfo, artistEntity.getArtistName(), apiKey);
-//        artistEntity.setListeners(artist.getListeners());
-//        artistEntity.setPlays(artist.getPlaycount());
-//        boolean artistInserted = Database.insertIfNotExists(artistEntity);
-//        if (!artistInserted) {
-//            return;
-//        }
-//        List<String> tagNames = artist.getTags()
-//                .stream()
-//                .limit(TAGS_LIMIT)
-//                .collect(Collectors.toList());
-//        for (int j = 0; j < tagNames.size(); j++) {
-//            String tagName = tagNames.get(j);
-//            Tags tagEntity = new Tags(tagName, 0, 0);
-//            try {
-//                insertTag(tagEntity, apiKey);
-//            } catch (RequestWrapper.RequestException e) {
-//                continue;
-//            }
-//            ArtistsTags artistTagEntity = new ArtistsTags(artistEntity, tagEntity, (byte) (j + 1));
-//            Database.insert(artistTagEntity);
-//        }
+    private static Artists insertArtistWithTags(Artist artist, String apiKey) {
+        Artists artistEntity = new Artists(artist.getName(), artist.getListeners(), artist.getPlaycount());
+        boolean artistInserted = Database.insertIfNotExists(artistEntity, "artist_name");
+        if (artistInserted) {
+            List<String> tagNames = artist.getTags().stream().limit(ARTIST_TAGS_LIMIT).collect(Collectors.toList());
+            for (int i = 0; i < tagNames.size(); i++) {
+                String tagName = tagNames.get(i);
+                Tag tag;
+                try {
+                    tag = request(Tag::getInfo, tagName, apiKey);
+                } catch (RequestWrapper.RequestException e) {
+                    continue; // Can't parse tag. Skip it.
+                } catch (NullPointerException e) {
+                    continue; // Last-fm library bug. Skip this tag.
+                }
+                Tags tagEntity = new Tags(tag.getName(), tag.getReach(), tag.getTaggings());
+                Database.insertIfNotExists(tagEntity, "tag_name");
+                ArtistsTags artistsTagsEntity = new ArtistsTags(artistEntity, tagEntity, (byte) (i + 1));
+                Database.insert(artistsTagsEntity);
+            }
+        }
+        return artistEntity;
     }
 
-    private static void insertTag(Tags tagEntity, String apiKey) throws RequestWrapper.RequestException {
-//        Tag tag;
-//        try {
-//            tag = request(Tag::getInfo, tagEntity.getTagName(), apiKey);
-//        } catch (NullPointerException e) {
-//            throw new RequestWrapper.RequestException(); // Last-fm library bug. Skip this tag.
-//        }
-//        tagEntity.setReach(tag.getReach());
-//        tagEntity.setTaggings(tag.getTaggings());
-//        Database.insertIfNotExists(tagEntity);
+    private static Tracks insertTrackWithTags(Track track, Artists artistEntity, String apiKey) {
+        Tracks trackEntity = new Tracks(
+                artistEntity, track.getName(), track.getDuration(), track.getListeners(), track.getPlaycount());
+        boolean trackInserted = Database.insertIfNotExists(trackEntity, "artist_id", "track_name");
+        if (trackInserted) {
+            List<String> tagNames = track.getTags().stream().limit(TRACK_TAGS_LIMIT).collect(Collectors.toList());
+            for (int i = 0; i < tagNames.size(); i++) {
+                String tagName = tagNames.get(i);
+                Tag tag;
+                try {
+                    tag = request(Tag::getInfo, tagName, apiKey);
+                } catch (RequestWrapper.RequestException e) {
+                    continue; // Can't parse tag. Skip it.
+                } catch (NullPointerException e) {
+                    continue; // Last-fm library bug. Skip this tag.
+                }
+                Tags tagEntity = new Tags(tag.getName(), tag.getReach(), tag.getTaggings());
+                Database.insertIfNotExists(tagEntity, "tag_name");
+                TracksTags tracksTagsEntity = new TracksTags(tagEntity, trackEntity, (byte) (i + 1));
+                Database.insert(tracksTagsEntity);
+            }
+        }
+        return trackEntity;
     }
 }

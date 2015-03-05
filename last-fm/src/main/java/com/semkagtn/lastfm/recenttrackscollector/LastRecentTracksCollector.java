@@ -29,12 +29,14 @@ public class LastRecentTracksCollector implements RecentTracksCollector {
     public List<Track> collect(int userId) throws RequestWrapper.RequestException {
         List<Track> result = new ArrayList<>();
         int tracksLeft = limit;
+        int page = 0;
         while (tracksLeft > 0) {
             int tracksCount = Math.min(tracksLeft, REQUEST_LIMIT);
             Collection<Track> tracks =
-                    request(User::getRecentTracks, String.valueOf(userId), 0, tracksCount, apiKey).getPageResults();
+                    request(User::getRecentTracks, String.valueOf(userId), page, tracksCount, apiKey).getPageResults();
             result.addAll(tracks);
             tracksLeft -= tracksCount;
+            page += tracksCount;
         }
         return result;
     }

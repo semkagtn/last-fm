@@ -30,11 +30,15 @@ public class Database {
     }
 
     public static <T> List<T> select(Class<T> clazz) {
+        session.clear();
+        sessionFactory.getCache().evictAllRegions();
         List<T> result = session.createCriteria(clazz).list();
         return result;
     }
 
     public static <T> List<T> select(Class<T> clazz, String condition) {
+        session.clear();
+        sessionFactory.getCache().evictAllRegions();
         Query query = session.createQuery("from " + clazz.getSimpleName() + " where " + condition);
         List<T> result = query.list();
         return result;
@@ -56,7 +60,9 @@ public class Database {
         return !isExists;
     }
 
-    private static <T> boolean objectExists(T object, String... uniqueFields) {
+    public static <T> boolean objectExists(T object, String... uniqueFields) {
+        session.clear();
+        sessionFactory.getCache().evictAllRegions();
         Set<String> uniqueFieldsSet = new TreeSet<>(Arrays.asList(uniqueFields));
         Map<String, Object> columnValue = new TreeMap<>();
         Class<?> clazz = object.getClass();
