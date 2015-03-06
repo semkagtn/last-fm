@@ -30,15 +30,11 @@ public class Database {
     }
 
     public static <T> List<T> select(Class<T> clazz) {
-        session.clear();
-        sessionFactory.getCache().evictAllRegions();
         List<T> result = session.createCriteria(clazz).list();
         return result;
     }
 
     public static <T> List<T> select(Class<T> clazz, String condition) {
-        session.clear();
-        sessionFactory.getCache().evictAllRegions();
         Query query = session.createQuery("from " + clazz.getSimpleName() + " where " + condition);
         List<T> result = query.list();
         return result;

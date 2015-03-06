@@ -1,24 +1,43 @@
 package com.semkagtn.lastfm;
 
-import com.semkagtn.lastfm.api.Api;
-import com.semkagtn.lastfm.api.Artist;
-import com.semkagtn.lastfm.api.cache.ExpirationPolicy;
-import com.semkagtn.lastfm.api.cache.FileSystemCache;
+import com.semkagtn.lastfm.api.*;
+
+import java.util.List;
 
 /**
- * Created by semkagtn on 3/2/15.
+ * Created by semkagtn on 3/6/15.
  */
 public class Test {
 
-    private static final String API_KEY = "c3f08d2af7231974467281edd2836cf3";
+    public static void main(String[] args) {
+        User user = Api.call(User.GetInfo.createRequest("floop1k"));
+        List<User> friends = Api.call(User.GetFriends.createRequest(String.valueOf(user.getId()), 0, 10));
+        List<Track> recentTracks = Api.call(User.GetRecentTracks.createRequest(
+                String.valueOf(user.getId()), 0, 200));
+        for (Track recentTrack : recentTracks) {
+            Artist artist = null;
+            try {
+                artist = Api.call(Artist.GetInfo.createRequest(recentTrack.getArtist()));
+            } catch (Api.CallError e) {
 
-    public static void main(String[] args) throws Exception {
-        Api.setApiKey(API_KEY);
-        Api.setCache(new FileSystemCache());
-        Api.setCacheExpirationPolicy(ExpirationPolicy.TWO_MONTHS);
-        Api.enableLogger(true);
+            }
+            if (artist != null) {
+                for (String tagName : artist.getTags()) {
+                    Api.call(Tag.GetInfo.createRequest(tagName));
+                }
+            }
 
-        Artist artist = Artist.getInfo("Green Day");
-        System.out.println(artist.getName() + " " + artist.getTags());
+            Track track = null;
+            try {
+                track = Api.call(Track.GetInfo.createRequest(recentTrack.getArtist(), recentTrack.getName()));
+            } catch (Api.CallError e) {
+
+            }
+            if (track != null) {
+                for (String tagName : artist.getTags()) {
+                    Api.call(Tag.GetInfo.createRequest(tagName));
+                }
+            }
+        }
     }
 }
