@@ -1,12 +1,11 @@
 package com.semkagtn.lastfm.userwalker;
 
-import com.semkagtn.lastfm.utils.RequestWrapper;
-import de.umass.lastfm.User;
+import com.semkagtn.lastfm.api.Api;
+import com.semkagtn.lastfm.api.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.semkagtn.lastfm.utils.RequestWrapper.request;
 
 /**
  * Created by semkagtn on 2/14/15.
@@ -21,16 +20,14 @@ public class RandomRecursiveUserWalker implements UserWalker {
 
     private final int depth;
     private final int friendsLimit;
-    private final String apiKey;
 
-    public RandomRecursiveUserWalker(int depth, int friendsLimit, String apiKey) {
+    public RandomRecursiveUserWalker(int depth, int friendsLimit) {
         this.depth = depth;
         this.friendsLimit = friendsLimit;
-        this.apiKey = apiKey;
     }
 
     @Override
-    public User nextUser() throws RequestWrapper.RequestException {
+    public User nextUser() {
         if (iterator.hasNext()) {
             return iterator.next();
         } else {
@@ -39,41 +36,38 @@ public class RandomRecursiveUserWalker implements UserWalker {
                 int randomId = random.nextInt(ID_BOUND);
                 try {
                     if (!visitedUsers.contains(randomId)) {
-                        user = request(User::getInfo, String.valueOf(randomId), apiKey);
+                        user = Api.call(User.GetInfo.createRequest(String.valueOf(randomId)));
+                        visitedUsers.add(user.getId());
+                        iterator = friendsIterator(user.getId());
                     }
-                } catch (RequestWrapper.RequestException e) {
+                } catch (Api.ResponseError | Api.NotJsonInResponseException e) {
                     continue;
                 }
             }
-            int userId = Integer.valueOf(user.getId());
-            visitedUsers.add(userId);
-            iterator = friendsIterator(userId);
             return user;
         }
     }
 
-    private Iterator<User> friendsIterator(int userId) throws RequestWrapper.RequestException {
+    private Iterator<User> friendsIterator(int userId) throws Api.NotJsonInResponseException {
         List<User> users = new ArrayList<>();
         dfs(userId, 0, users);
         return users.iterator();
     }
 
-    private void dfs(int userId, int currentDepth, List<User> users) throws RequestWrapper.RequestException {
+    private void dfs(int userId, int currentDepth, List<User> users) throws Api.NotJsonInResponseException {
         if (currentDepth == depth) {
             return;
         }
-        List<User> friends = request(User::getFriends,
-                String.valueOf(userId), false, 0, friendsLimit, apiKey)
-                .getPageResults()
+        List<User> friends = Api.call(User.GetFriends.createRequest(String.valueOf(userId), 0, friendsLimit))
                 .stream()
-                .filter(x -> !visitedUsers.contains(Integer.valueOf(x.getId())))
+                .filter(x -> !visitedUsers.contains(x.getId()))
                 .collect(Collectors.toList());
         users.addAll(friends);
         for (User friend : friends) {
-            visitedUsers.add(Integer.valueOf(friend.getId()));
+            visitedUsers.add(friend.getId());
         }
         for (User friend : friends) {
-            dfs(Integer.valueOf(friend.getId()), currentDepth + 1, users);
+            dfs(friend.getId(), currentDepth + 1, users);
         }
     }
 }

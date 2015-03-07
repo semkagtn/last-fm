@@ -124,13 +124,12 @@ public class User {
                 throw new ParseResponseError("no 'friends' field", response);
             }
             JSONArray usersJson = friendsJson.optJSONArray("user");
-            if (usersJson == null) {
-                throw new ParseResponseError("no 'user' field", response);
-            }
             List<User> result = new ArrayList<>();
-            for (int i = 0; i < usersJson.length(); i++) {
-                JSONObject userJson = usersJson.getJSONObject(i);
-                result.add(parseUserJson(userJson));
+            if (usersJson != null) {
+                for (int i = 0; i < usersJson.length(); i++) {
+                    JSONObject userJson = usersJson.getJSONObject(i);
+                    result.add(parseUserJson(userJson));
+                }
             }
             return result;
         }
@@ -158,36 +157,35 @@ public class User {
                 throw new ParseResponseError("no 'recenttracks' field", response);
             }
             JSONArray tracksArrayJson = recentTracksJson.optJSONArray("track");
-            if (tracksArrayJson == null) {
-                throw new ParseResponseError("no 'track' field", response);
-            }
             List<Track> tracks = new ArrayList<>();
-            for (int i = 0; i < tracksArrayJson.length(); i++) {
-                JSONObject trackJson = tracksArrayJson.getJSONObject(i);
-                String name = trackJson.optString("name");
-                if (name == null) {
-                    throw new ParseResponseError("no 'name' field", response);
-                }
-                Track track = new Track();
-                track.setName(name);
-                track.setArtist("");
-                JSONObject artistJson = trackJson.optJSONObject("artist");
-                if (artistJson != null) {
-                    track.setArtist(artistJson.optString("#text", ""));
-                }
-                JSONObject dateJson = trackJson.optJSONObject("date");
-                if (dateJson != null) {
-                    long playedWhen = dateJson.optLong("uts", -1);
-                    if (playedWhen == -1) {
-                        throw new ParseResponseError("no 'uts' field", response);
+            if (tracksArrayJson != null) {
+                for (int i = 0; i < tracksArrayJson.length(); i++) {
+                    JSONObject trackJson = tracksArrayJson.getJSONObject(i);
+                    String name = trackJson.optString("name");
+                    if (name == null) {
+                        throw new ParseResponseError("no 'name' field", response);
                     }
-                    track.setPlayedWhen(Utils.dateToString(new Date(playedWhen * 1000)));
+                    Track track = new Track();
+                    track.setName(name);
+                    track.setArtist("");
+                    JSONObject artistJson = trackJson.optJSONObject("artist");
+                    if (artistJson != null) {
+                        track.setArtist(artistJson.optString("#text", ""));
+                    }
+                    JSONObject dateJson = trackJson.optJSONObject("date");
+                    if (dateJson != null) {
+                        long playedWhen = dateJson.optLong("uts", -1);
+                        if (playedWhen == -1) {
+                            throw new ParseResponseError("no 'uts' field", response);
+                        }
+                        track.setPlayedWhen(Utils.dateToString(new Date(playedWhen * 1000)));
+                    }
+                    track.setDuration(-1);
+                    track.setListeners(-1);
+                    track.setPlaycount(-1);
+                    track.setTags(new ArrayList<>());
+                    tracks.add(track);
                 }
-                track.setDuration(-1);
-                track.setListeners(-1);
-                track.setPlaycount(-1);
-                track.setTags(new ArrayList<>());
-                tracks.add(track);
             }
             return tracks;
         }

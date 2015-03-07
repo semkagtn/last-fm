@@ -12,26 +12,26 @@ import java.util.List;
 public abstract class Request<T> {
 
     private List<NameValuePair> parameters;
-    private String md5;
+    private String hash;
 
     protected Request(List<NameValuePair> parameters) {
         this.parameters = parameters;
-        this.md5 = generateMd5();
+        this.hash = generateSha1();
     }
 
     List<NameValuePair> getParameters() {
         return parameters;
     }
 
-    public String md5() {
-        return md5;
+    public String hash() {
+        return hash;
     }
 
-    private String generateMd5() {
+    private String generateSha1() {
         String parametersString = parameters.stream()
                 .map(x -> x.getName() + "" + x.getValue())
                 .reduce("", (x, y) -> x + y);
-        return DigestUtils.md5Hex(parametersString);
+        return DigestUtils.shaHex(parametersString);
     }
 
     abstract T parseResponse(JSONObject response);

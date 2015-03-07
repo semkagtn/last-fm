@@ -40,21 +40,15 @@
         </dependency>
 
         <dependency>
-            <groupId>de.u-mass</groupId>
-            <artifactId>lastfm-java</artifactId>
-            <version>0.1.2</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20141113</version>
         </dependency>
 
         <dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-stable</artifactId>
             <version>3.6.11</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20141113</version>
         </dependency>
 
     </dependencies>

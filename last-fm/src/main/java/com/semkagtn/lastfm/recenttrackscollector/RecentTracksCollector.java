@@ -1,7 +1,6 @@
 package com.semkagtn.lastfm.recenttrackscollector;
 
-import com.semkagtn.lastfm.utils.RequestWrapper;
-import de.umass.lastfm.Track;
+import com.semkagtn.lastfm.api.Track;
 
 import java.util.List;
 
@@ -10,5 +9,5 @@ import java.util.List;
  */
 public interface RecentTracksCollector {
 
-    List<Track> collect(int userId) throws RequestWrapper.RequestException;
+    List<Track> collect(int userId);
 }
