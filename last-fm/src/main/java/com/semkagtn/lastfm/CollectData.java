@@ -21,7 +21,7 @@ public class CollectData {
     private static final int FRIENDS_LIMIT = 5;
     private static final int ARTIST_TAGS_LIMIT = 5;
     private static final int TRACK_TAGS_LIMIT = 5;
-    private static final int RECENT_TRACKS_LIMIT = 50;
+    private static final int RECENT_TRACKS_LIMIT = 1000;
 
     public static void main(String[] args) {
         String apiKey = args.length > 0 ? ApiKeys.get(Integer.parseInt(args[0])) : ApiKeys.getRandom();
@@ -37,34 +37,37 @@ public class CollectData {
         RecentTracksCollector recentTracksCollector = new LastRecentTracksCollector(RECENT_TRACKS_LIMIT);
 
         Database.open();
-        for (int i = 0; i < usersAmount; i++) {
-            User user = userWalker.nextUser();
-            List<Track> recentTracks = recentTracksCollector.collect(user.getId());
-            if (recentTracks.size() == 0) {
-                i--;
-                continue; // Can't get user's recent tracks
-            }
-            Users userEntity = insertUserIfItInformative(user);
-            if (userEntity == null) {
-                i--;
-                continue; // Uninformative user or it already exists
-            }
-
-            for (Track recentTrack : recentTracks) {
-                Artists artistEntity = null;
-                if (!recentTrack.getArtist().equals("")) {
-                    artistEntity = insertArtistWithTags(recentTrack.getArtist());
+        try {
+            for (int i = 0; i < usersAmount; i++) {
+                User user = userWalker.nextUser();
+                List<Track> recentTracks = recentTracksCollector.collect(user.getId());
+                if (recentTracks.size() == 0) {
+                    i--;
+                    continue; // Can't get user's recent tracks
+                }
+                Users userEntity = insertUserIfItInformative(user);
+                if (userEntity == null) {
+                    i--;
+                    continue; // Uninformative user or it already exists
                 }
 
-                Tracks trackEntity = insertTrackWithTags(artistEntity, recentTrack.getArtist(), recentTrack.getName());
-                if (trackEntity != null) {
-                    RecentTracks recentTrackEntity =
-                            new RecentTracks(trackEntity, userEntity, recentTrack.getPlayedWhen());
-                    Database.insert(recentTrackEntity);
+                for (Track recentTrack : recentTracks) {
+                    Artists artistEntity = null;
+                    if (!recentTrack.getArtist().equals("")) {
+                        artistEntity = insertArtistWithTags(recentTrack.getArtist());
+                    }
+
+                    Tracks trackEntity = insertTrackWithTags(artistEntity, recentTrack.getArtist(), recentTrack.getName());
+                    if (trackEntity != null) {
+                        RecentTracks recentTrackEntity =
+                                new RecentTracks(trackEntity, userEntity, recentTrack.getPlayedWhen());
+                        Database.insert(recentTrackEntity);
+                    }
                 }
             }
+        } finally {
+            Database.close();
         }
-        Database.close();
     }
 
     private static Users insertUserIfItInformative(User user) {
