@@ -40,8 +40,12 @@ public class CollectData {
         for (int i = 0; i < usersAmount; i++) {
             User user = userWalker.nextUser();
             List<Track> recentTracks = recentTracksCollector.collect(user.getId());
+            if (recentTracks.size() == 0) {
+                i--;
+                continue; // Can't get user's recent tracks
+            }
             Users userEntity = insertUserIfItInformative(user);
-            if (recentTracks.size() == 0 || userEntity == null) {
+            if (userEntity == null) {
                 i--;
                 continue; // Uninformative user or it already exists
             }

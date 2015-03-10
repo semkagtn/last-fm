@@ -34,14 +34,14 @@ public class Database {
     }
 
     public static <T> boolean insert(T object) {
+        session.beginTransaction();
         try {
-            session.beginTransaction();
             session.insert(object);
-            session.getTransaction().commit();
         } catch (ConstraintViolationException e) {
             session.getTransaction().rollback();
             return false;
         }
+        session.getTransaction().commit();
         return true;
     }
 
