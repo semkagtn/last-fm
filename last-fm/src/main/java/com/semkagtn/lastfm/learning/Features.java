@@ -16,12 +16,20 @@ public class Features {
         this.numericFeatures = new ArrayList<>();
     }
 
-    public void addFeature(NominalFeature nominalFeature) {
+    public void addNominalFeature(NominalFeature nominalFeature) {
         nominalFeatures.add(nominalFeature);
     }
 
-    public void addFeature(NumericFeature numericFeature) {
+    public void addNumericFeature(NumericFeature numericFeature) {
         numericFeatures.add(numericFeature);
+    }
+
+    public void addNominalFeatures(List<NominalFeature> nominalFeatures) {
+        this.nominalFeatures.addAll(nominalFeatures);
+    }
+
+    public void addNumericFeatures(List<NumericFeature> numericFeatures) {
+        this.numericFeatures.addAll(numericFeatures);
     }
 
     public List<NominalFeature> getNominalFeatures() {

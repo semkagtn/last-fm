@@ -1,26 +1,53 @@
 package com.semkagtn.lastfm;
 
-import java.io.IOException;
+import com.semkagtn.lastfm.database.Database;
+import com.semkagtn.lastfm.learning.DataSet;
+import com.semkagtn.lastfm.learning.Features;
+import com.semkagtn.lastfm.learning.NominalFeature;
+import com.semkagtn.lastfm.learning.WekaTools;
+import com.semkagtn.lastfm.learning.classes.GenderClass;
+import com.semkagtn.lastfm.learning.features.ArtistsHistogramFeatures;
+import com.semkagtn.lastfm.learning.features.TracksHistogramFeatures;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by semkagtn on 2/17/15.
  */
 public class CreateArff {
 
-    public static void main(String[] args) throws IOException {
-//        Database.open();
+    private static final int TOP_ARTISTS = 2000;
+    private static final int TOP_TRACKS = 5000;
 
-//        List<Users> users = Database.select(Users.class, "gender <> 'n' and playcount > 0");
-
-//        DataSet dataSet = new DataSet("dataset-gender", users);
-
-//        Features features = new Features();
-
-//        NominalFeature clazz = new GenderClass();
-
-//        WekaTools.writeArffFile(dataSet, features, clazz);
-
-//        Database.close();
+    public static void main(String[] args) throws Exception {
+        Database.open();
+        try {
+            List<Users> users = sameCountOfMalesAndFemales(Database.select(Users.class, "gender <> 'n'"));
+            DataSet dataSet = new DataSet("dataset-gender", users);
+            Features features = new Features();
+            features.addNumericFeatures(ArtistsHistogramFeatures.getFeatures(TOP_ARTISTS));
+            features.addNumericFeatures(TracksHistogramFeatures.getFeatures(TOP_TRACKS));
+            NominalFeature clazz = new GenderClass();
+            WekaTools.writeArffFile(dataSet, features, clazz);
+        } finally {
+            Database.close();
+        }
     }
 
+    private static List<Users> sameCountOfMalesAndFemales(List<Users> users) {
+        List<Users> males = users.stream()
+                .filter(x -> x.getGender().equals("m"))
+                .collect(Collectors.toList());
+        List<Users> females = users.stream()
+                .filter(x -> x.getGender().equals("f"))
+                .collect(Collectors.toList());
+        int minimumLength = Math.min(males.size(), females.size());
+        males = males.stream().limit(minimumLength).collect(Collectors.toList());
+        females = females.stream().limit(minimumLength).collect(Collectors.toList());
+        List<Users> result = new ArrayList<>(males);
+        result.addAll(females);
+        return result;
+    }
 }

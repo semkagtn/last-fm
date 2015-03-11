@@ -1,48 +1,33 @@
 package com.semkagtn.lastfm.database;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.exception.ConstraintViolationException;
 
 import java.util.List;
 
 /**
- * Created by semkagtn on 2/16/15.
+ * Created by semkagtn on 11.03.15.
  */
 public class Database {
 
     private static SessionFactory sessionFactory;
-    private static StatelessSession session;
+    private static Session session;
 
     public static void open() {
         Configuration configuration = new Configuration().configure();
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openStatelessSession();
+        session = sessionFactory.openSession();
     }
 
-    public static <T> T select(Class<T> clazz, String id) {
-        Query query = session.createQuery("from " + clazz.getSimpleName() + " where id = :id");
-        query.setString("id", id);
-        List<T> list = query.list();
-        return (list.size() > 0) ? list.get(0) : null;
+    public static <T> List<T> select(Class<T> clazz, String condition) {
+        Query query = session.createQuery("from " + clazz.getSimpleName() + " where " + condition);
+        return (List<T>) query.list();
     }
 
-    public static <T> T select(Class<T> clazz, int id) {
-        return select(clazz, String.valueOf(id));
-    }
-
-    public static <T> boolean insert(T object) {
-        session.beginTransaction();
-        try {
-            session.insert(object);
-        } catch (ConstraintViolationException e) {
-            session.getTransaction().rollback();
-            return false;
-        }
-        session.getTransaction().commit();
-        return true;
+    public static <T> List<T> select(Class<T> clazz) {
+        return (List<T>) session.createCriteria(clazz).list();
     }
 
     public static void close() {

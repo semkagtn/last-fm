@@ -1,7 +1,7 @@
 package com.semkagtn.lastfm;
 
 import com.semkagtn.lastfm.api.*;
-import com.semkagtn.lastfm.database.Database;
+import com.semkagtn.lastfm.database.StatelessDatabase;
 import com.semkagtn.lastfm.recenttrackscollector.LastRecentTracksCollector;
 import com.semkagtn.lastfm.recenttrackscollector.RecentTracksCollector;
 import com.semkagtn.lastfm.userwalker.RandomRecursiveUserWalker;
@@ -36,7 +36,7 @@ public class CollectData {
         UserWalker userWalker = new RandomRecursiveUserWalker(USER_WALKER_DEPTH, FRIENDS_LIMIT);
         RecentTracksCollector recentTracksCollector = new LastRecentTracksCollector(RECENT_TRACKS_LIMIT);
 
-        Database.open();
+        StatelessDatabase.open();
         try {
             for (int i = 0; i < usersAmount; i++) {
                 User user = userWalker.nextUser();
@@ -61,12 +61,12 @@ public class CollectData {
                     if (trackEntity != null) {
                         RecentTracks recentTrackEntity =
                                 new RecentTracks(trackEntity, userEntity, recentTrack.getPlayedWhen());
-                        Database.insert(recentTrackEntity);
+                        StatelessDatabase.insert(recentTrackEntity);
                     }
                 }
             }
         } finally {
-            Database.close();
+            StatelessDatabase.close();
         }
     }
 
@@ -75,7 +75,7 @@ public class CollectData {
         Users userEntity = new Users(user.getId(), user.getAge(), gender, user.getCountry(), user.getPlaycount());
         if (user.getPlaycount() >= RECENT_TRACKS_LIMIT &&
                 (!gender.equals("n") || user.getAge() > 0) &&
-                Database.insert(userEntity)) {
+                StatelessDatabase.insert(userEntity)) {
             return userEntity;
         }
         return null;
@@ -83,13 +83,13 @@ public class CollectData {
 
     private static Artists insertArtistWithTags(String artistName) {
         Request<Artist> artistRequest = Artist.GetInfo.createRequest(artistName);
-        Artists artistEntity = Database.select(Artists.class, artistRequest.hash());
+        Artists artistEntity = StatelessDatabase.select(Artists.class, artistRequest.hash());
         if (artistEntity == null) {
             try {
                 Artist artist = Api.call(artistRequest);
                 artistEntity = new Artists(artistRequest.hash(), artist.getName(),
                         artist.getListeners(), artist.getPlaycount());
-                if (Database.insert(artistEntity)) {
+                if (StatelessDatabase.insert(artistEntity)) {
                     List<String> tagNames = artist.getTags().stream()
                             .limit(ARTIST_TAGS_LIMIT)
                             .collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class CollectData {
                         String tagName = artist.getTags().get(j);
                         Tags tagEntity = insertTag(tagName);
                         ArtistsTags artistTagEntity = new ArtistsTags(tagEntity, artistEntity, (byte) (j + 1));
-                        Database.insert(artistTagEntity);
+                        StatelessDatabase.insert(artistTagEntity);
                     }
                 }
             } catch (Api.ResponseError | Api.NotJsonInResponseException e) {
@@ -109,14 +109,14 @@ public class CollectData {
 
     private static Tracks insertTrackWithTags(Artists artistEntity, String artistName, String trackName) {
         Request<Track> trackRequest = Track.GetInfo.createRequest(artistName, trackName);
-        Tracks trackEntity = Database.select(Tracks.class, trackRequest.hash());
+        Tracks trackEntity = StatelessDatabase.select(Tracks.class, trackRequest.hash());
         if (trackEntity == null) {
             try {
                 Track track = Api.call(trackRequest);
                 trackEntity = new Tracks(trackRequest.hash(), track.getName(),
                         track.getDuration(), track.getListeners(), track.getPlaycount());
                 trackEntity.setArtists(artistEntity);
-                if (Database.insert(trackEntity)) {
+                if (StatelessDatabase.insert(trackEntity)) {
                     List<String> tagNames = track.getTags().stream()
                             .limit(TRACK_TAGS_LIMIT)
                             .collect(Collectors.toList());
@@ -124,7 +124,7 @@ public class CollectData {
                         String tagName = track.getTags().get(j);
                         Tags tagEntity = insertTag(tagName);
                         TracksTags trackTagEntity = new TracksTags(tagEntity, trackEntity, (byte) (j + 1));
-                        Database.insert(trackTagEntity);
+                        StatelessDatabase.insert(trackTagEntity);
                     }
                 }
             } catch (Api.ResponseError | Api.NotJsonInResponseException e) {
@@ -136,7 +136,7 @@ public class CollectData {
 
     private static Tags insertTag(String tagName) {
         Request<Tag> tagRequest = Tag.GetInfo.createRequest(tagName);
-        Tags tagEntity = Database.select(Tags.class, tagRequest.hash());
+        Tags tagEntity = StatelessDatabase.select(Tags.class, tagRequest.hash());
         if (tagEntity == null) {
             Tag tag;
             try {
@@ -146,7 +146,7 @@ public class CollectData {
             } catch (Api.NotJsonInResponseException | Api.ResponseError e) {
                 tagEntity = new Tags(tagRequest.hash(), tagName, -1, -1);
             }
-            Database.insert(tagEntity);
+            StatelessDatabase.insert(tagEntity);
         }
         return tagEntity;
     }

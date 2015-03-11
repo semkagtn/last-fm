@@ -6,6 +6,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class WekaTools {
         return instances;
     }
 
-    public static void writeArffFile(DataSet dataSet, Features features, NominalFeature clazz) throws IOException {
+    public static void writeArffFile(DataSet dataSet, Features features, NominalFeature clazz) throws Exception {
         List<NominalFeature> nominalFeatures = features.getNominalFeatures();
         List<NumericFeature> numericFeatures = features.getNumericFeatures();
         List<Users> users = dataSet.getUsers();
@@ -40,7 +42,8 @@ public class WekaTools {
 
         Instances instances = new Instances(dataSet.getName(), attributesVector, users.size());
 
-        for (Users user : dataSet.getUsers()) {
+        for (int i = 0; i < dataSet.getUsers().size(); i++) {
+            Users user = dataSet.getUsers().get(i);
             Instance instance = new Instance(features.size() + 1);
             for (NominalFeature feature : nominalFeatures) {
                 instance.setValue(feature.getAttribute(), feature.calculate(user));
@@ -50,7 +53,13 @@ public class WekaTools {
             }
             instance.setValue(clazz.getAttribute(), clazz.calculate(user));
             instances.add(instance);
+            System.out.println("User " + i + " finished");
         }
+
+        Normalize normalize = new Normalize();
+        normalize.setInputFormat(instances);
+        instances = Filter.useFilter(instances, normalize);
+
         ArffSaver saver = new ArffSaver();
         saver.setInstances(instances);
         saver.setFile(new File(dataSet.getName() + ".arff"));
