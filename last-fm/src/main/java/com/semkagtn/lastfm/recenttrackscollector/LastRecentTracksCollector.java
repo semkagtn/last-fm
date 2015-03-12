@@ -25,14 +25,14 @@ public class LastRecentTracksCollector implements RecentTracksCollector {
         List<Track> result = new ArrayList<>();
         try {
             int tracksLeft = limit;
-            int page = 0;
+            int page = 1;
             while (tracksLeft > 0) {
                 int tracksCount = Math.min(tracksLeft, REQUEST_LIMIT);
                 List<Track> tracks = Api.call(
                         User.GetRecentTracks.createRequest(String.valueOf(userId), page, tracksCount));
                 result.addAll(tracks);
-                tracksLeft -= tracksCount;
-                page += tracksCount;
+                tracksLeft -= tracks.size();
+                page += tracks.size();
             }
         } catch (Api.NotJsonInResponseException | Api.ResponseError e) {
             result = new ArrayList<>();

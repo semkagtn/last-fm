@@ -130,6 +130,11 @@ public class User {
                     JSONObject userJson = usersJson.getJSONObject(i);
                     result.add(parseUserJson(userJson));
                 }
+            } else {
+                JSONObject userJson = friendsJson.optJSONObject("user");
+                if (userJson != null) {
+                    result.add(parseUserJson(userJson));
+                }
             }
             return result;
         }
@@ -161,33 +166,51 @@ public class User {
             if (tracksArrayJson != null) {
                 for (int i = 0; i < tracksArrayJson.length(); i++) {
                     JSONObject trackJson = tracksArrayJson.getJSONObject(i);
-                    String name = trackJson.optString("name");
-                    if (name == null) {
-                        throw new ParseResponseError("no 'name' field", response);
+                    Track track = parseTrackJson(trackJson, response);
+                    if (track != null) {
+                        tracks.add(track);
                     }
-                    Track track = new Track();
-                    track.setName(name);
-                    track.setArtist("");
-                    JSONObject artistJson = trackJson.optJSONObject("artist");
-                    if (artistJson != null) {
-                        track.setArtist(artistJson.optString("#text", ""));
-                    }
-                    JSONObject dateJson = trackJson.optJSONObject("date");
-                    if (dateJson != null) {
-                        long playedWhen = dateJson.optLong("uts", -1);
-                        if (playedWhen == -1) {
-                            throw new ParseResponseError("no 'uts' field", response);
-                        }
-                        track.setPlayedWhen(Utils.dateToString(new Date(playedWhen * 1000)));
-                    }
-                    track.setDuration(-1);
-                    track.setListeners(-1);
-                    track.setPlaycount(-1);
-                    track.setTags(new ArrayList<>());
+                }
+            } else {
+                JSONObject trackJson = recentTracksJson.optJSONObject("track");
+                Track track = parseTrackJson(trackJson, recentTracksJson);
+                if (track != null) {
                     tracks.add(track);
                 }
             }
             return tracks;
+        }
+
+        private static Track parseTrackJson(JSONObject trackJson, JSONObject response) {
+            if (trackJson == null) {
+                return null;
+            }
+            String name = trackJson.optString("name");
+            if (name == null) {
+                throw new ParseResponseError("no 'name' field", response);
+            }
+            Track track = new Track();
+            track.setName(name);
+            track.setArtist("");
+            JSONObject artistJson = trackJson.optJSONObject("artist");
+            if (artistJson != null) {
+                track.setArtist(artistJson.optString("#text", ""));
+            }
+            JSONObject dateJson = trackJson.optJSONObject("date");
+            long playedWhen;
+            if (dateJson != null) {
+                playedWhen = dateJson.optLong("uts", -1) * 1000;
+                if (playedWhen < 0) {
+                    throw new ParseResponseError("no 'uts' field", response);
+                }
+                track.setDuration(-1);
+                track.setListeners(-1);
+                track.setPlaycount(-1);
+                track.setTags(new ArrayList<>());
+                track.setPlayedWhen(Utils.dateToString(new Date(playedWhen)));
+                return track;
+            }
+            return null;
         }
     }
 }

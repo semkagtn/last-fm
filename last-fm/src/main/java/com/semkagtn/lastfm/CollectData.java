@@ -40,15 +40,22 @@ public class CollectData {
         try {
             for (int i = 0; i < usersAmount; i++) {
                 User user = userWalker.nextUser();
+                if (!isInformative(user)) {
+                    i--;
+                    continue; // Uninformative user
+                }
+
                 List<Track> recentTracks = recentTracksCollector.collect(user.getId());
                 if (recentTracks.size() == 0) {
                     i--;
                     continue; // Can't get user's recent tracks
                 }
-                Users userEntity = insertUserIfItInformative(user);
-                if (userEntity == null) {
+
+                String gender = (user.getGender().equals("m") || user.getGender().equals("f")) ? user.getGender() : "n";
+                Users userEntity = new Users(user.getId(), user.getAge(), gender, user.getCountry(), user.getPlaycount());
+                if (!StatelessDatabase.insert(userEntity)) {
                     i--;
-                    continue; // Uninformative user or it already exists
+                    continue; // User already exists
                 }
 
                 for (Track recentTrack : recentTracks) {
@@ -70,15 +77,9 @@ public class CollectData {
         }
     }
 
-    private static Users insertUserIfItInformative(User user) {
-        String gender = (user.getGender().equals("m") || user.getGender().equals("f")) ? user.getGender() : "n";
-        Users userEntity = new Users(user.getId(), user.getAge(), gender, user.getCountry(), user.getPlaycount());
-        if (user.getPlaycount() >= RECENT_TRACKS_LIMIT &&
-                (!gender.equals("n") || user.getAge() > 0) &&
-                StatelessDatabase.insert(userEntity)) {
-            return userEntity;
-        }
-        return null;
+    private static boolean isInformative(User user) {
+        return (user.getGender().equals("m") || user.getGender().equals("f") ||
+                user.getAge() > 0) && user.getPlaycount() >= RECENT_TRACKS_LIMIT;
     }
 
     private static Artists insertArtistWithTags(String artistName) {

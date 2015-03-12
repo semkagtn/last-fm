@@ -125,7 +125,8 @@ public class Api {
                 }
             }
             if (result.has("error")) {
-                throw new ResponseError(result.getString("message"));
+                int errorCode = result.getInt("error");
+                throw new ResponseError(result.getString("message"), errorCode);
             }
         }
         return request.parseResponse(result);
@@ -134,8 +135,15 @@ public class Api {
 
     public static class ResponseError extends Error {
 
-        public ResponseError(String message) {
+        private int errorCode;
+
+        public int getErrorCode() {
+            return errorCode;
+        }
+
+        public ResponseError(String message, int errorCode) {
             super(message);
+            this.errorCode = errorCode;
         }
     }
 
