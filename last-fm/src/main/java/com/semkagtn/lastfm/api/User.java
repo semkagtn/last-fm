@@ -1,6 +1,6 @@
 package com.semkagtn.lastfm.api;
 
-import com.semkagtn.lastfm.utils.Utils;
+import com.semkagtn.lastfm.utils.DateUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -207,7 +207,7 @@ public class User {
                 track.setListeners(-1);
                 track.setPlaycount(-1);
                 track.setTags(new ArrayList<>());
-                track.setPlayedWhen(Utils.dateToString(new Date(playedWhen)));
+                track.setPlayedWhen(DateUtils.dateToString(new Date(playedWhen)));
                 return track;
             }
             return null;

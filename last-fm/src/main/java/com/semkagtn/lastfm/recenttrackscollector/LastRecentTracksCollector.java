@@ -14,10 +14,12 @@ public class LastRecentTracksCollector implements RecentTracksCollector {
 
     private static final int REQUEST_LIMIT = 200;
 
-    private final int limit;
+    private int limit;
+    private Api api;
 
-    public LastRecentTracksCollector(int limit) {
+    public LastRecentTracksCollector(int limit, Api api) {
         this.limit = limit;
+        this.api = api;
     }
 
     @Override
@@ -28,13 +30,13 @@ public class LastRecentTracksCollector implements RecentTracksCollector {
             int page = 1;
             while (tracksLeft > 0) {
                 int tracksCount = Math.min(tracksLeft, REQUEST_LIMIT);
-                List<Track> tracks = Api.call(
+                List<Track> tracks = api.call(
                         User.GetRecentTracks.createRequest(String.valueOf(userId), page, tracksCount));
                 result.addAll(tracks);
                 tracksLeft -= tracks.size();
                 page += tracks.size();
             }
-        } catch (Api.NotJsonInResponseException | Api.ResponseError e) {
+        } catch (Api.NotJsonInResponseError | Api.ResponseError e) {
             result = new ArrayList<>();
         }
         return result;

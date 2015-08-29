@@ -1,9 +1,11 @@
 package com.semkagtn.lastfm.database;
 
+import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.exception.ConstraintViolationException;
 
 import java.util.List;
 
@@ -21,11 +23,12 @@ public class Database {
         session = sessionFactory.openSession();
     }
 
-    public static <T> List<T> select(Class<T> clazz, String condition) {
-        Query query = session.createQuery("from " + clazz.getSimpleName() + " where " + condition);
-        return (List<T>) query.list();
+    @SuppressWarnings("unchecked")
+    public static <T> T select(Class<T> clazz, String id) {
+        return (T) session.get(clazz, id);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> List<T> select(Class<T> clazz) {
         return (List<T>) session.createCriteria(clazz).list();
     }
@@ -33,6 +36,18 @@ public class Database {
     public static void close() {
         session.close();
         sessionFactory.close();
+    }
+
+    public static <T> boolean insert(T object) {
+        session.beginTransaction();
+        try {
+            session.save(object);
+            session.getTransaction().commit();
+        } catch (ConstraintViolationException | NonUniqueObjectException e) {
+            session.getTransaction().rollback();
+            return false;
+        }
+        return true;
     }
 
     private Database() {

@@ -16,7 +16,7 @@ public abstract class Request<T> {
 
     protected Request(List<NameValuePair> parameters) {
         this.parameters = parameters;
-        this.hash = generateSha1();
+        this.hash = generateHash();
     }
 
     List<NameValuePair> getParameters() {
@@ -27,11 +27,11 @@ public abstract class Request<T> {
         return hash;
     }
 
-    private String generateSha1() {
+    private String generateHash() {
         String parametersString = parameters.stream()
                 .map(x -> x.getName() + "" + x.getValue())
                 .reduce("", (x, y) -> x + y);
-        return DigestUtils.shaHex(parametersString);
+        return DigestUtils.md5Hex(parametersString);
     }
 
     abstract T parseResponse(JSONObject response);

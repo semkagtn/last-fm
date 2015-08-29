@@ -29,67 +29,31 @@ public class Api {
 
     private static final String API_URL = "http://ws.audioscrobbler.com/2.0/";
 
-    private static final int DEFAULT_REQUEST_REPEATS = 5;
-    private static final int DEFAULT_CONNECTION_TIMEOUT = 20_000;
-    private static final String DEFAULT_API_KEY = "03269abd0820d42871cda4514e03325e";
-    private static final String DEFAULT_USER_AGENT = "tst";
+    private Logger logger = Logger.getLogger("LastFM.API");
+    private ApiConfig config;
+    private CloseableHttpClient client;
 
-    private static Logger logger = Logger.getLogger("LastFM.API");
-    private static CloseableHttpClient client;
-    private static String apiKey;
-    private static String userAgent;
-    private static int requestRepeats;
-
-    static {
-        setRequestRepeats(DEFAULT_REQUEST_REPEATS);
-        setTimeout(DEFAULT_CONNECTION_TIMEOUT);
-        setApiKey(DEFAULT_API_KEY);
-        setUserAgent(DEFAULT_USER_AGENT);
-        enableLogger(true);
-    }
-
-    public static void setRequestRepeats(int requestRepeats) {
-        Api.requestRepeats = requestRepeats;
-    }
-
-    public static void setTimeout(int timeout) {
-        if (client != null) {
-            try {
-                client.close();
-            } catch (IOException e) {
-                // WTF??
-            }
-        }
+    public Api(ApiConfig config) {
+        this.config = config;
+        logger.setLevel(config.isEnableLogger() ? Level.ALL : Level.OFF);
         client = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
-                        .setSocketTimeout(timeout)
-                        .setConnectTimeout(timeout)
+                        .setSocketTimeout(config.getTimeout())
+                        .setConnectTimeout(config.getTimeout())
                         .build())
                 .build();
     }
 
-    public static void setApiKey(String apiKey) {
-        Api.apiKey = apiKey;
-    }
-
-    public static void setUserAgent(String userAgent) {
-        Api.userAgent = userAgent;
-    }
-
-    public static void enableLogger(boolean enable) {
-        logger.setLevel(enable ? Level.ALL : Level.OFF);
-    }
-
-    public static <T> T call(Request<T> request) throws NotJsonInResponseException {
+    public <T> T call(Request<T> request) throws NotJsonInResponseError {
         List<NameValuePair> parameters = new ArrayList<>();
         parameters.addAll(request.getParameters());
-        parameters.add(new BasicNameValuePair("api_key", apiKey));
+        parameters.add(new BasicNameValuePair("api_key", config.getApiKey()));
         parameters.add(new BasicNameValuePair("format", "json"));
 
         JSONObject result = null;
         int requestCount = 0;
         while (result == null) {
-            if (requestCount == requestRepeats) {
+            if (requestCount == config.getRequestRepeats()) {
                 throw new ConnectionError();
             }
             requestCount++;
@@ -97,20 +61,21 @@ public class Api {
             try {
                 HttpPost postRequest = new HttpPost(API_URL);
                 postRequest.setEntity(new UrlEncodedFormEntity(parameters, "UTF-8"));
-                postRequest.setHeader("User-Agent", userAgent);
+                postRequest.setHeader("User-Agent", config.getUserAgent());
                 HttpResponse response = client.execute(postRequest);
+                logger.info("REQUEST: " + API_URL + "?" + EntityUtils.toString(postRequest.getEntity()));
                 StatusLine status = response.getStatusLine();
                 if (status.getStatusCode() != HttpStatus.SC_OK) {
+                    logger.info("RESPONSE: " + status.getStatusCode() + " " + status.getReasonPhrase());
                     continue;
                 }
                 responseStream = response.getEntity().getContent();
                 String jsonString = IOUtils.toString(responseStream, "UTF-8");
-                logger.info("REQUEST: " + EntityUtils.toString(postRequest.getEntity()) + "\n"
-                        + "RESPONSE: " + jsonString.trim());
+                logger.info("RESPONSE: " + jsonString.trim());
                 try {
                     result = new JSONObject(jsonString);
                 } catch (JSONException e) {
-                    throw new NotJsonInResponseException();
+                    throw new NotJsonInResponseError();
                 }
             } catch (IOException e) {
                 logger.info("Something wrong: " + e.getMessage());
@@ -151,7 +116,7 @@ public class Api {
 
     }
 
-    public static class NotJsonInResponseException extends Exception {
+    public static class NotJsonInResponseError extends Error {
 
     }
 }

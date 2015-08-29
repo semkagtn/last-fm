@@ -14,6 +14,7 @@ import java.util.List;
 public class Track {
 
     private String name;
+    private String album;
     private String artist;
     private int duration;
     private int listeners;
@@ -25,55 +26,63 @@ public class Track {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
     public String getArtist() {
         return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
     public int getDuration() {
         return duration;
     }
 
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     public int getListeners() {
         return listeners;
+    }
+
+    public void setListeners(int listeners) {
+        this.listeners = listeners;
     }
 
     public int getPlaycount() {
         return playcount;
     }
 
+    public void setPlaycount(int playcount) {
+        this.playcount = playcount;
+    }
+
     public List<String> getTags() {
         return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     public String getPlayedWhen() {
         return playedWhen;
     }
 
-    void setName(String name) {
-        this.name = name;
-    }
-
-    void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    void setListeners(int listeners) {
-        this.listeners = listeners;
-    }
-
-    void setPlaycount(int playcount) {
-        this.playcount = playcount;
-    }
-
-    void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    void setPlayedWhen(String playedWhen) {
+    public void setPlayedWhen(String playedWhen) {
         this.playedWhen = playedWhen;
     }
 
@@ -110,6 +119,11 @@ public class Track {
             if (artistJson != null) {
                 artist = artistJson.optString("name", "");
             }
+            String album = "";
+            JSONObject albumJson = trackJson.optJSONObject("album");
+            if (albumJson != null) {
+                album = albumJson.optString("title", "");
+            }
             List<String> tags = new ArrayList<>();
             JSONObject tagsJson = trackJson.optJSONObject("toptags");
             if (tagsJson != null) {
@@ -127,6 +141,7 @@ public class Track {
             Track track = new Track();
             track.setName(name);
             track.setArtist(artist);
+            track.setAlbum(album);
             track.setDuration(trackJson.optInt("duration", -1));
             track.setListeners(trackJson.optInt("listeners", -1));
             track.setPlaycount(trackJson.optInt("playcount", -1));

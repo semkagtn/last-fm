@@ -18,22 +18,23 @@ import java.util.stream.Collectors;
  */
 public class CreateArff {
 
-    private static final int TOP_ARTISTS = 2000;
+    private static final int TOP_ARTISTS = 3000;
     private static final int TOP_TRACKS = 5000;
 
     public static void main(String[] args) throws Exception {
         Database.open();
-        try {
-            List<Users> users = sameCountOfMalesAndFemales(Database.select(Users.class, "gender <> 'n'"));
-            DataSet dataSet = new DataSet("dataset-gender", users);
-            Features features = new Features();
-            features.addNumericFeatures(ArtistsHistogramFeatures.getFeatures(TOP_ARTISTS));
-            features.addNumericFeatures(TracksHistogramFeatures.getFeatures(TOP_TRACKS));
-            NominalFeature clazz = new GenderClass();
-            WekaTools.writeArffFile(dataSet, features, clazz);
-        } finally {
-            Database.close();
-        }
+//        try {
+//            List<Users> users = Database.select(Users.class, "gender <> 'n'");
+//            users = sameCountOfMalesAndFemales(users);
+//            DataSet dataSet = new DataSet("gender-same-top-3000-artists", users);
+//            Features features = new Features();
+//            features.addNumericFeatures(ArtistsHistogramFeatures.getFeatures(TOP_ARTISTS));
+//            features.addNumericFeatures(TracksHistogramFeatures.getFeatures(TOP_TRACKS));
+//            NominalFeature clazz = new GenderClass();
+//            WekaTools.writeArffFile(dataSet, features, clazz);
+//        } finally {
+//            Database.close();
+//        }
     }
 
     private static List<Users> sameCountOfMalesAndFemales(List<Users> users) {

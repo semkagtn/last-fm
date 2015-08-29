@@ -20,10 +20,12 @@ public class RandomRecursiveUserWalker implements UserWalker {
 
     private final int depth;
     private final int friendsLimit;
+    private Api api;
 
-    public RandomRecursiveUserWalker(int depth, int friendsLimit) {
+    public RandomRecursiveUserWalker(int depth, int friendsLimit, Api api) {
         this.depth = depth;
         this.friendsLimit = friendsLimit;
+        this.api = api;
     }
 
     @Override
@@ -36,29 +38,28 @@ public class RandomRecursiveUserWalker implements UserWalker {
                 int randomId = random.nextInt(ID_BOUND);
                 try {
                     if (!visitedUsers.contains(randomId)) {
-                        user = Api.call(User.GetInfo.createRequest(String.valueOf(randomId)));
+                        user = api.call(User.GetInfo.createRequest(String.valueOf(randomId)));
                         visitedUsers.add(user.getId());
                         iterator = friendsIterator(user.getId());
                     }
-                } catch (Api.ResponseError | Api.NotJsonInResponseException e) {
-                    continue;
+                } catch (Api.ResponseError | Api.NotJsonInResponseError ignored) {
                 }
             }
             return user;
         }
     }
 
-    private Iterator<User> friendsIterator(int userId) throws Api.NotJsonInResponseException {
+    private Iterator<User> friendsIterator(int userId) throws Api.NotJsonInResponseError {
         List<User> users = new ArrayList<>();
         dfs(userId, 0, users);
         return users.iterator();
     }
 
-    private void dfs(int userId, int currentDepth, List<User> users) throws Api.NotJsonInResponseException {
+    private void dfs(int userId, int currentDepth, List<User> users) throws Api.NotJsonInResponseError {
         if (currentDepth == depth) {
             return;
         }
-        List<User> friends = Api.call(User.GetFriends.createRequest(String.valueOf(userId), 0, friendsLimit))
+        List<User> friends = api.call(User.GetFriends.createRequest(String.valueOf(userId), 0, friendsLimit))
                 .stream()
                 .filter(x -> !visitedUsers.contains(x.getId()))
                 .collect(Collectors.toList());

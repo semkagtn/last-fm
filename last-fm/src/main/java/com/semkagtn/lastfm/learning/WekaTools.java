@@ -8,6 +8,7 @@ import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.Standardize;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,10 +56,6 @@ public class WekaTools {
             instances.add(instance);
             System.out.println("User " + i + " finished");
         }
-
-        Normalize normalize = new Normalize();
-        normalize.setInputFormat(instances);
-        instances = Filter.useFilter(instances, normalize);
 
         ArffSaver saver = new ArffSaver();
         saver.setInstances(instances);

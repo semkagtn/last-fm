@@ -4,8 +4,10 @@ import com.semkagtn.lastfm.learning.WekaTools;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.Standardize;
 
 import java.io.File;
 import java.util.Random;
@@ -15,16 +17,24 @@ import java.util.Random;
  */
 public class LearnModel {
 
+    private static final int T = 5;
+    private static final int Q = 5;
+
     public static void main(String[] args) throws Exception {
-        File file = new File("dataset-gender.arff");
+        File file = new File("gender-same-top-3000-artists.arff");
         Instances instances = WekaTools.readArffFile(file);
+
+        Filter filter = new Normalize();
+        filter.setInputFormat(instances);
+        Filter.useFilter(instances, filter);
 
         Classifier classifier = new NaiveBayes();
         classifier.buildClassifier(instances);
 
         Evaluation evaluation = new Evaluation(instances);
-        evaluation.crossValidateModel(classifier, instances, 10, new Random());
-
+        for (int i = 0; i < T; i++) {
+            evaluation.crossValidateModel(classifier, instances, Q, new Random());
+        }
         System.out.println(evaluation.toSummaryString());
     }
 }
