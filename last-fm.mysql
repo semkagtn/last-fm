@@ -4,7 +4,7 @@ use last_fm;
 
 
 create table users (
-    id int not null primary key,
+    id char(32) not null primary key,
     age int not null,
     gender enum('m', 'f', 'n') not null,
     country char(2) not null,

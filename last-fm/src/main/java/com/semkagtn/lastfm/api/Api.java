@@ -1,13 +1,12 @@
 package com.semkagtn.lastfm.api;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -59,11 +58,11 @@ public class Api {
             requestCount++;
             InputStream responseStream = null;
             try {
-                HttpPost postRequest = new HttpPost(API_URL);
-                postRequest.setEntity(new UrlEncodedFormEntity(parameters, "UTF-8"));
-                postRequest.setHeader("User-Agent", config.getUserAgent());
-                HttpResponse response = client.execute(postRequest);
-                logger.info("REQUEST: " + API_URL + "?" + EntityUtils.toString(postRequest.getEntity()));
+                String requestString = API_URL + "?" + URLEncodedUtils.format(parameters, "UTF-8");
+                HttpGet getRequest = new HttpGet(requestString);
+                getRequest.setHeader("User-Agent", config.getUserAgent());
+                HttpResponse response = client.execute(getRequest);
+                logger.info("REQUEST: " + requestString);
                 StatusLine status = response.getStatusLine();
                 if (status.getStatusCode() != HttpStatus.SC_OK) {
                     logger.info("RESPONSE: " + status.getStatusCode() + " " + status.getReasonPhrase());

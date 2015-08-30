@@ -15,14 +15,14 @@ import java.util.List;
  */
 public class User {
 
-    private int id;
+    private String name;
     private int age;
     private String gender;
     private String country;
     private int playcount;
 
-    public int getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
     public int getAge() {
@@ -41,8 +41,8 @@ public class User {
         return playcount;
     }
 
-    void setId(int id) {
-        this.id = id;
+    void setName(String name) {
+        this.name = name;
     }
 
     void setAge(int age) {
@@ -66,12 +66,12 @@ public class User {
     }
 
     private static User parseUserJson(JSONObject userJson) {
-        int id = userJson.optInt("id", -1);
-        if (id == -1) {
-            throw new Request.ParseResponseError("no 'id' field", userJson);
+        String name = userJson.optString("name");
+        if (name == null) {
+            throw new Request.ParseResponseError("no 'name' field", userJson);
         }
         User result = new User();
-        result.setId(id);
+        result.setName(name);
         result.setAge(userJson.optInt("age", -1));
         result.setCountry(userJson.optString("country", ""));
         result.setGender(userJson.optString("gender", "n"));
