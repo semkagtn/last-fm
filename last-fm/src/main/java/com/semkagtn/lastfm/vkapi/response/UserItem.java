@@ -1,4 +1,4 @@
-package com.semkagtn.lastfm.vkapi.response.users.get;
+package com.semkagtn.lastfm.vkapi.response;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;

@@ -1,4 +1,4 @@
-package com.semkagtn.lastfm.vkapi.response.audio.get;
+package com.semkagtn.lastfm.vkapi.response;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -21,6 +21,12 @@ public class AudioItem {
     @JsonProperty("url")
     private String url;
 
+    @JsonProperty("lyrics_id")
+    private long lyricsId;
+
+    @JsonProperty("date")
+    private long date;
+
     public String getArtist() {
         return artist;
     }
@@ -35,5 +41,13 @@ public class AudioItem {
 
     public String getUrl() {
         return url;
+    }
+
+    public long getLyricsId() {
+        return lyricsId;
+    }
+
+    public long getDate() {
+        return date;
     }
 }

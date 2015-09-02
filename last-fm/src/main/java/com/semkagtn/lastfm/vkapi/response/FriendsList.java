@@ -1,6 +1,5 @@
-package com.semkagtn.lastfm.vkapi.response.friends.get;
+package com.semkagtn.lastfm.vkapi.response;
 
-import com.semkagtn.lastfm.vkapi.response.users.get.UserItem;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 

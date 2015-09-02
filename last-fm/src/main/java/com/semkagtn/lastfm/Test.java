@@ -4,91 +4,54 @@ package com.semkagtn.lastfm;
 import com.semkagtn.lastfm.vkapi.VkAccessTokens;
 import com.semkagtn.lastfm.vkapi.VkApi;
 import com.semkagtn.lastfm.vkapi.VkApiConfig;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import com.semkagtn.lastfm.vkapi.response.UserItem;
+import com.semkagtn.lastfm.vkapi.response.WallGetFilter;
+import com.semkagtn.lastfm.vkapi.response.WallGetResponse;
+import com.semkagtn.lastfm.vkapi.response.WallItem;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by semkagtn on 20.07.15.
  */
 public class Test {
 
-    public static class AnimalDeserializer extends JsonDeserializer<List<Animal>> {
-
-        @Override
-        public List<Animal> deserialize(JsonParser jsonParser,
-                                        DeserializationContext deserializationContext) throws IOException {
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<Animal> result = new ArrayList<>();
-            JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-            for (int i = 0; i < node.size(); i++) {
-                JsonNode child = node.get(i);
-                Class<? extends Animal> clazz;
-                if (child.get("catPoints") != null) {
-                    clazz = Cat.class;
-                } else {
-                    clazz = Dog.class;
-                }
-                result.add(objectMapper.readValue(child, clazz));
-            }
-            return result;
-        }
-    }
-
-    public static class Animals {
-
-        private List<Animal> animals;
-
-        @JsonDeserialize(using = AnimalDeserializer.class)
-        public List<Animal> getAnimals() {
-            return animals;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class Animal {
-
-        private String name;
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    public static class Dog extends Animal {
-
-        private int dogPoints;
-
-        public int getDogPoints() {
-            return dogPoints;
-        }
-    }
-
-    public static class Cat extends Animal {
-
-        private int catPoints;
-
-        public int getCatPoints() {
-            return catPoints;
-        }
-    }
+    private static final int MAX_WALL_ITEMS = 100;
 
     public static void main(String[] args) throws IOException {
         VkApi api = new VkApi(VkApiConfig.newInstance()
                 .withToken(VkAccessTokens.getRandom())
                 .build());
 
-        Animals animals = new ObjectMapper()
-                .readValue("{\"animals\":[{\"catPoints\": 1},{\"dogPoints\": 2}]}", Animals.class);
-        System.out.println();
+        int userId = api.usersGet(Arrays.asList("id32900511")).getResponse().get(0).getId();
+        List<UserItem> friends = api.friendsGet(userId, 0, 5000).getResponse().getItems();
+
+        List<Integer> allResults = new ArrayList<>();
+        for (UserItem friend : friends) {
+            int friendId = friend.getId();
+            List<WallItem> friendResult = new ArrayList<>();
+            WallGetResponse response = api.wallGet(friendId, 0, 0, WallGetFilter.ALL);
+            if (response.getError() != null) {
+                continue;
+            }
+            int allPosts = response.getResponse().getCount();
+            int ownerPosts = api.wallGet(friendId, 0, 0, WallGetFilter.OWNER).getResponse().getCount();
+            for (int offset = 0; offset < ownerPosts; offset += MAX_WALL_ITEMS) {
+                friendResult.addAll(api.wallGet(friendId, offset, offset + MAX_WALL_ITEMS, WallGetFilter.OWNER)
+                        .getResponse().getItems().stream()
+                        .filter(post -> post.getAttachments() != null && post.getAttachments().size() > 0)
+                        .collect(Collectors.toList()));
+            }
+            int tracks = friendResult.stream()
+                    .mapToInt(x -> x.getAttachments().size())
+                    .sum();
+            allResults.add(tracks);
+        }
+        allResults.sort(Integer::compareTo);
+        System.out.println(allResults);
     }
 }

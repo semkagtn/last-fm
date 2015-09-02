@@ -1,9 +1,11 @@
 package com.semkagtn.lastfm.vkapi;
 
 import com.semkagtn.lastfm.vkapi.response.BaseVkResponse;
-import com.semkagtn.lastfm.vkapi.response.audio.get.AudioGetResponse;
-import com.semkagtn.lastfm.vkapi.response.friends.get.FriendsGetResponse;
-import com.semkagtn.lastfm.vkapi.response.users.get.UsersGetResponse;
+import com.semkagtn.lastfm.vkapi.response.AudioGetResponse;
+import com.semkagtn.lastfm.vkapi.response.FriendsGetResponse;
+import com.semkagtn.lastfm.vkapi.response.UsersGetResponse;
+import com.semkagtn.lastfm.vkapi.response.WallGetFilter;
+import com.semkagtn.lastfm.vkapi.response.WallGetResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -28,8 +30,9 @@ import java.util.logging.Logger;
  */
 public class VkApi {
 
-    private static final String BASE_URL = "https://api.vk.com/method/";
-    private static final String VERSION = "5.37";
+    private static final String API_URL = "https://api.vk.com/method/";
+    private static final String API_VERSION = "5.37";
+    private static final String ENCODING = "UTF-8";
     private static final String FIELDS = "sex,bdate,site,music";
 
     private static final String AUDIO_GET = "audio.get";
@@ -55,13 +58,13 @@ public class VkApi {
 
     private <T extends BaseVkResponse> T call(String method, List<NameValuePair> parameters, Class<T> resultClass) {
         parameters.add(new BasicNameValuePair("access_token", config.getToken()));
-        parameters.add(new BasicNameValuePair("v", VERSION));
+        parameters.add(new BasicNameValuePair("v", API_VERSION));
         InputStream responseStream = null;
         T result = null;
         boolean responseReceived = false;
         while (!responseReceived) {
             try {
-                String requestString = BASE_URL + method + "?" + URLEncodedUtils.format(parameters, "UTF-8");
+                String requestString = API_URL + method + "?" + URLEncodedUtils.format(parameters, ENCODING);
                 HttpGet getRequest = new HttpGet(requestString);
                 HttpResponse response = client.execute(getRequest);
                 logger.info("REQUEST: " + requestString);
@@ -72,7 +75,7 @@ public class VkApi {
                     throw new VkApiError("Something wrong: " + stringStatus);
                 }
                 responseStream = response.getEntity().getContent();
-                String jsonString = IOUtils.toString(responseStream, "UTF-8");
+                String jsonString = IOUtils.toString(responseStream, ENCODING);
                 logger.info("RESPONSE: " + jsonString);
                 result = objectMapper.readValue(jsonString, resultClass);
                 if (result.getError() != null && result.getError().getErrorCode() == 6) {
@@ -134,5 +137,14 @@ public class VkApi {
         parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
         parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
         return call(FRIENDS_GET, parameters, FriendsGetResponse.class);
+    }
+
+    public WallGetResponse wallGet(int userId, int offset, int count, WallGetFilter filter) {
+        List<NameValuePair> parameters = new ArrayList<>();
+        parameters.add(new BasicNameValuePair("owner_id", String.valueOf(userId)));
+        parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
+        parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        parameters.add(new BasicNameValuePair("filter", filter.getValue()));
+        return call(WALL_GET, parameters, WallGetResponse.class);
     }
 }

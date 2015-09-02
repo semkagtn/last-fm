@@ -1,6 +1,5 @@
-package com.semkagtn.lastfm.vkapi.response.users.get;
+package com.semkagtn.lastfm.vkapi.response;
 
-import com.semkagtn.lastfm.vkapi.response.BaseVkResponse;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
