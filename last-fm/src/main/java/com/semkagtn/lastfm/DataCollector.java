@@ -1,15 +1,5 @@
 package com.semkagtn.lastfm;
 
-import com.semkagtn.lastfm.api.*;
-import com.semkagtn.lastfm.database.Database;
-import com.semkagtn.lastfm.recenttrackscollector.LastRecentTracksCollector;
-import com.semkagtn.lastfm.recenttrackscollector.RecentTracksCollector;
-import com.semkagtn.lastfm.userwalker.RandomRecursiveUserWalker;
-import com.semkagtn.lastfm.userwalker.UserWalker;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Created by semkagtn on 2/14/15.
  */

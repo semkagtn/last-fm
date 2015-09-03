@@ -1,13 +1,5 @@
 package com.semkagtn.lastfm;
 
-import com.semkagtn.lastfm.api.ApiConfig;
-import com.semkagtn.lastfm.api.ApiKeys;
-import com.semkagtn.lastfm.database.Database;
-import org.apache.http.protocol.RequestUserAgent;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by semkagtn on 20.07.15.
  */

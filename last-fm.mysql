@@ -4,50 +4,33 @@ use last_fm;
 
 
 create table users (
-    id char(32) not null primary key,
-    age int not null,
-    gender enum('m', 'f', 'n') not null,
-    country char(2) not null,
-    playcount int not null
+    id int not null primary key,
+    age int,
+    gender enum('m', 'f')
 );
 
 create table artists (
     id char(32) not null primary key,
-    artist_name varchar(1023) not null,
-    listeners int not null,
-    playcount int not null
-);
-
-create table albums (
-    id char(32) not null primary key,
-    album_name varchar(1023) not null,
-    listeners int not null,
-    playcount int not null
+    artist_name varchar(1023) not null
 );
 
 create table tracks (
     id char(32) not null primary key,
     artist_id char(32),
-    album_id char(32),
     track_name varchar(1023) not null,
-    duration int not null,
-    listeners int not null,
-    playcount int not null,
     foreign key (artist_id) references artists(id)
 );
 
 create table tags (
     id char(32) not null primary key,
-    tag_name varchar(1023) not null,
-    reach int not null,
-    taggings int not null
+    tag_name varchar(1023) not null
 );
 
-create table recent_tracks (
+create table users_tracks (
     id int not null primary key auto_increment,
     user_id int not null,
     track_id char(32) not null,
-    played_when datetime not null,
+    added_when datetime not null,
     foreign key (user_id) references users(id),
     foreign key (track_id) references tracks(id)
 );
@@ -62,16 +45,6 @@ create table artists_tags (
     foreign key (tag_id) references tags(id)
 );
 
-create table albums_tags (
-    id int not null primary key auto_increment,
-    album_id char(32) not null,
-    tag_id char(32) not null,
-    position tinyint not null,
-    unique key (album_id, tag_id),
-    foreign key (album_id) references albums(id),
-    foreign key (tag_id) references tags(id)
-);
-
 create table tracks_tags (
     id int not null primary key auto_increment,
     track_id char(32) not null,
@@ -83,7 +56,6 @@ create table tracks_tags (
 );
 
 
-create index recent_tracks__user_id on recent_tracks(user_id);
+create index users_tracks__user_id on users_tracks(user_id);
 create index artists_tags__artist_id on artists_tags(artist_id);
 create index tracks_tags__track_id on tracks_tags(track_id);
-create index albums_tags__album_id on albums_tags(album_id);

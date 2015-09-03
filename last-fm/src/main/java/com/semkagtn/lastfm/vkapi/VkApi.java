@@ -1,29 +1,14 @@
 package com.semkagtn.lastfm.vkapi;
 
-import com.semkagtn.lastfm.vkapi.response.BaseVkResponse;
-import com.semkagtn.lastfm.vkapi.response.AudioGetResponse;
-import com.semkagtn.lastfm.vkapi.response.FriendsGetResponse;
-import com.semkagtn.lastfm.vkapi.response.UsersGetResponse;
-import com.semkagtn.lastfm.vkapi.response.WallGetFilter;
-import com.semkagtn.lastfm.vkapi.response.WallGetResponse;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
+import com.semkagtn.lastfm.httpclient.HttpClient;
+import com.semkagtn.lastfm.vkapi.response.*;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Created by semkagtn on 30.08.15.
@@ -32,85 +17,45 @@ public class VkApi {
 
     private static final String API_URL = "https://api.vk.com/method/";
     private static final String API_VERSION = "5.37";
-    private static final String ENCODING = "UTF-8";
-    private static final String FIELDS = "sex,bdate,site,music";
+    private static final String FIELDS = "sex,bdate,music";
 
     private static final String AUDIO_GET = "audio.get";
     private static final String USERS_GET = "users.get";
     private static final String FRIENDS_GET = "friends.get";
     private static final String WALL_GET = "wall.get";
 
-    private Logger logger = Logger.getLogger("VK.API");
-    private VkApiConfig config;
-    private CloseableHttpClient client;
+    private HttpClient client;
+    private String token;
     private ObjectMapper objectMapper;
 
-    public VkApi(VkApiConfig config) {
-        this.config = config;
-        this.client = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setSocketTimeout(config.getTimeout())
-                        .setConnectTimeout(config.getTimeout())
-                        .build())
-                .build();
+    public VkApi(HttpClient client, String token) {
+        this.client = client;
+        this.token = token;
         this.objectMapper = new ObjectMapper();
     }
 
     private <T extends BaseVkResponse> T call(String method, List<NameValuePair> parameters, Class<T> resultClass) {
-        parameters.add(new BasicNameValuePair("access_token", config.getToken()));
+        parameters.add(new BasicNameValuePair("access_token", token));
         parameters.add(new BasicNameValuePair("v", API_VERSION));
-        InputStream responseStream = null;
+
         T result = null;
-        boolean responseReceived = false;
-        while (!responseReceived) {
+        boolean resultReceived = false;
+        while (!resultReceived) {
+            String response = client.request(API_URL + method, parameters);
             try {
-                String requestString = API_URL + method + "?" + URLEncodedUtils.format(parameters, ENCODING);
-                HttpGet getRequest = new HttpGet(requestString);
-                HttpResponse response = client.execute(getRequest);
-                logger.info("REQUEST: " + requestString);
-                StatusLine status = response.getStatusLine();
-                if (status.getStatusCode() != HttpStatus.SC_OK) {
-                    String stringStatus = status.getStatusCode() + " " + status.getReasonPhrase();
-                    logger.info("RESPONSE: " + stringStatus);
-                    throw new VkApiError("Something wrong: " + stringStatus);
-                }
-                responseStream = response.getEntity().getContent();
-                String jsonString = IOUtils.toString(responseStream, ENCODING);
-                logger.info("RESPONSE: " + jsonString);
-                result = objectMapper.readValue(jsonString, resultClass);
-                if (result.getError() != null && result.getError().getErrorCode() == 6) {
-                    responseReceived = false;
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        // WTF??
-                    }
-                } else {
-                    responseReceived = true;
-                }
+                result = objectMapper.readValue(response, resultClass);
             } catch (IOException e) {
-                throw new VkApiError(e);
-            } finally {
-                try {
-                    if (responseStream != null) {
-                        responseStream.close();
-                    }
-                } catch (IOException e) {
-                    // WTF??
-                }
+                throw new VkResponseParseError(e);
             }
+            resultReceived = result.getError() == null || result.getError().getErrorCode() != 6;
         }
         return result;
     }
 
-    public static class VkApiError extends Error {
+    public static class VkResponseParseError extends Error {
 
-        public VkApiError(String message) {
-            super(message);
-        }
-
-        public VkApiError(Throwable throwable) {
-            super(throwable);
+        public VkResponseParseError(Throwable cause) {
+            super(cause);
         }
     }
 
