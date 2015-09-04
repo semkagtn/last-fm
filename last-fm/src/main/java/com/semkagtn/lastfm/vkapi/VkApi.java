@@ -47,7 +47,20 @@ public class VkApi {
             } catch (IOException e) {
                 throw new VkResponseParseError(e);
             }
-            resultReceived = result.getError() == null || result.getError().getErrorCode() != 6;
+            if (result.getError() != null) {
+                int errorCode = result.getError().getErrorCode();
+                if (errorCode == 6 || errorCode == 9 || errorCode == 10) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // WTF??
+                    }
+                } else {
+                    resultReceived = true;
+                }
+            } else {
+                resultReceived = true;
+            }
         }
         return result;
     }

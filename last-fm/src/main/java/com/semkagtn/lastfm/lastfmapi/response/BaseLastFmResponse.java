@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.lastfmapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -21,5 +22,10 @@ public abstract class BaseLastFmResponse {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

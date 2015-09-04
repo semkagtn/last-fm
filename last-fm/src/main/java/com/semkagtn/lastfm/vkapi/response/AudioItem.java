@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.vkapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -49,5 +50,10 @@ public class AudioItem {
 
     public long getDate() {
         return date;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

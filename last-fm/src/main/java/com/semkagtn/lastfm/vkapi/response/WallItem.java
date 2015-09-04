@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.vkapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -34,19 +35,23 @@ public class WallItem {
         return attachments;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
+    }
+
     public static class OnlyAudioAttachmentsDeserializer extends JsonDeserializer<List<AudioAttachment>> {
 
         @Override
         public List<AudioAttachment> deserialize(JsonParser jsonParser,
                                                  DeserializationContext deserializationContext) throws IOException {
-            ObjectMapper objectMapper = new ObjectMapper();
             List<AudioAttachment> result = new ArrayList<>();
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);
             for (int i = 0; i < node.size(); i++) {
                 JsonNode child = node.get(i);
                 JsonNode typeNode = child.get("type");
                 if (typeNode != null && typeNode.getTextValue().equals("audio")) {
-                    result.add(objectMapper.readValue(child, AudioAttachment.class));
+                    result.add(JsonUtils.fromJson(child, AudioAttachment.class));
                 }
             }
             return result;

@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.vkapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
@@ -14,5 +15,10 @@ public class UsersGetResponse extends BaseVkResponse {
 
     public List<UserItem> getResponse() {
         return response;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

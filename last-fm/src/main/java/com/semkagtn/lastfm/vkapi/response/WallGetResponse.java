@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.vkapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -12,5 +13,10 @@ public class WallGetResponse extends BaseVkResponse {
 
     public WallItemList getResponse() {
         return response;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

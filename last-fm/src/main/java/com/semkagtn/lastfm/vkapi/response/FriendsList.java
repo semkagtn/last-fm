@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.vkapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -23,5 +24,10 @@ public class FriendsList {
 
     public List<UserItem> getItems() {
         return items;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.lastfmapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -23,5 +24,10 @@ public class ArtistItem {
 
     public TagsItem getTags() {
         return tags;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

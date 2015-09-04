@@ -9,6 +9,12 @@ import com.semkagtn.lastfm.vkapi.VkAccessTokens;
 import com.semkagtn.lastfm.vkapi.VkApi;
 import com.semkagtn.lastfm.vkapi.response.AudioGetResponse;
 import com.semkagtn.lastfm.vkapi.response.AudioItem;
+import com.semkagtn.lastfm.vkapi.response.UserItem;
+import com.semkagtn.lastfm.vkapi.userwalker.RandomRecursiveVkUserWalker;
+import com.semkagtn.lastfm.vkapi.userwalker.VkUserWalker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by semkagtn on 03.09.15.
@@ -25,10 +31,11 @@ public class Test {
         LastFmApi lastFmApi = new LastFmApi(httpClient, apiKey);
         VkApi vkApi = new VkApi(httpClient, accessToken);
 
-        AudioGetResponse audioGetResponse = vkApi.audioGet(1602118, 7, 5);
-        for (AudioItem audioItem : audioGetResponse.getResponse().getItems()) {
-            lastFmApi.trackGetInfo(audioItem.getTitle(), audioItem.getArtist());
-            System.out.println();
+        VkUserWalker userWalker = new RandomRecursiveVkUserWalker(2, 5, vkApi);
+        List<UserItem> users = new ArrayList<>();
+        for (int i = 0; i < 300; i++) {
+            users.add(userWalker.nextUser());
         }
+        System.out.println();
     }
 }

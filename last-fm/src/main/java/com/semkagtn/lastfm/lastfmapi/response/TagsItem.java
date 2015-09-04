@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.lastfmapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -16,5 +17,10 @@ public class TagsItem {
 
     public List<TagItem> getTag() {
         return tag;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

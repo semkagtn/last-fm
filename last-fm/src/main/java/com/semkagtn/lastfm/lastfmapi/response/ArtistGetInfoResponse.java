@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.lastfmapi.response;
 
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -12,5 +13,10 @@ public class ArtistGetInfoResponse extends BaseLastFmResponse {
 
     public ArtistItem getArtist() {
         return artist;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
     }
 }

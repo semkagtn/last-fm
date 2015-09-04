@@ -48,24 +48,33 @@ public class HttpClient {
 
         String result;
         String errorReason = null;
+        InputStream responseStream = null;
         int repeats = 0;
         while (repeats < maxRepeatTimes) {
             try {
-                HttpResponse response = client.execute(getRequest);
                 logger.info("REQUEST: " + requestString);
+                HttpResponse response = client.execute(getRequest);
                 StatusLine status = response.getStatusLine();
                 if (status.getStatusCode() != HttpStatus.SC_OK) {
                     String stringStatus = status.getStatusCode() + " " + status.getReasonPhrase();
                     logger.info("RESPONSE: " + stringStatus);
                     errorReason = stringStatus;
                 } else {
-                    InputStream responseStream = response.getEntity().getContent();
+                    responseStream = response.getEntity().getContent();
                     result = IOUtils.toString(responseStream, ENCODING);
                     logger.info("RESPONSE: " + result);
                     return result;
                 }
             } catch (IOException e) {
                 errorReason = e.getMessage();
+            } finally {
+                if (responseStream != null) {
+                    try {
+                        responseStream.close();
+                    } catch (IOException e) {
+                        // WTF??
+                    }
+                }
             }
             repeats++;
         }
