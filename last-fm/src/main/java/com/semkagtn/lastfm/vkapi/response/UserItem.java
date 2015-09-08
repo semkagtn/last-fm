@@ -14,7 +14,7 @@ public class UserItem {
     private int id;
 
     @JsonProperty("sex")
-    private String sex;
+    private Integer sex;
 
     @JsonProperty("bdate")
     private String bdate;
@@ -25,7 +25,7 @@ public class UserItem {
     @JsonProperty("music")
     private String music;
 
-    public String getSex() {
+    public Integer getSex() {
         return sex;
     }
 

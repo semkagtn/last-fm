@@ -17,7 +17,7 @@ public class VkApi {
 
     private static final String API_URL = "https://api.vk.com/method/";
     private static final String API_VERSION = "5.37";
-    private static final String FIELDS = "sex,bdate,music";
+    private static final String FIELDS = "sex,bdate";
 
     private static final String AUDIO_GET = "audio.get";
     private static final String USERS_GET = "users.get";
@@ -79,29 +79,41 @@ public class VkApi {
         return call(USERS_GET, parameters, UsersGetResponse.class);
     }
 
-    public AudioGetResponse audioGet(int ownerId, int offset, int count) {
+    public AudioGetResponse audioGet(int ownerId, Integer offset, Integer count) {
         List<NameValuePair> parameters = new ArrayList<>();
         parameters.add(new BasicNameValuePair("owner_id", String.valueOf(ownerId)));
-        parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
-        parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        if (offset != null) {
+            parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
+        }
+        if (count != null) {
+            parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        }
         parameters.add(new BasicNameValuePair("need_user", "0"));
         return call(AUDIO_GET, parameters, AudioGetResponse.class);
     }
 
-    public FriendsGetResponse friendsGet(int userId, int offset, int count) {
+    public FriendsGetResponse friendsGet(int userId, Integer offset, Integer count) {
         List<NameValuePair> parameters = new ArrayList<>();
         parameters.add(new BasicNameValuePair("user_id", String.valueOf(userId)));
         parameters.add(new BasicNameValuePair("fields", FIELDS));
-        parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
-        parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        if (offset != null) {
+            parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
+        }
+        if (count != null) {
+            parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        }
         return call(FRIENDS_GET, parameters, FriendsGetResponse.class);
     }
 
-    public WallGetResponse wallGet(int userId, int offset, int count, WallGetFilter filter) {
+    public WallGetResponse wallGet(int userId, Integer offset, Integer count, WallGetFilter filter) {
         List<NameValuePair> parameters = new ArrayList<>();
         parameters.add(new BasicNameValuePair("owner_id", String.valueOf(userId)));
-        parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
-        parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        if (offset != null) {
+            parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
+        }
+        if (count != null) {
+            parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
+        }
         parameters.add(new BasicNameValuePair("filter", filter.getValue()));
         return call(WALL_GET, parameters, WallGetResponse.class);
     }

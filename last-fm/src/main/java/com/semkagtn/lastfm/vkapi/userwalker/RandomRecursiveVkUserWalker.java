@@ -37,10 +37,11 @@ public class RandomRecursiveVkUserWalker implements VkUserWalker {
                 int randomUserId = random.nextInt(USER_ID_BOUND);
                 if (!visitedUsers.contains(randomUserId)) {
                     UsersGetResponse response = api.usersGet(Arrays.asList(String.valueOf(randomUserId)));
-                    if (response.getError() == null && response.getResponse().size() > 0) {
+                    if (response.getResponse() != null && response.getResponse().size() > 0) {
                         user = response.getResponse().get(0);
-                        visitedUsers.add(user.getId());
-                        usersQueue.addAll(dfs(user.getId()));
+                        int userId = user.getId();
+                        visitedUsers.add(userId);
+                        usersQueue.addAll(dfs(userId));
                     }
                 }
             }

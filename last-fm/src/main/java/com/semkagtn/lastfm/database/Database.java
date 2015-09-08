@@ -1,5 +1,6 @@
 package com.semkagtn.lastfm.database;
 
+import com.semkagtn.lastfm.Users;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -23,9 +24,8 @@ public class Database {
         session = sessionFactory.openSession();
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T select(Class<T> clazz, String id) {
-        return (T) session.get(clazz, id);
+        return session.get(clazz, id);
     }
 
     @SuppressWarnings("unchecked")
@@ -38,7 +38,7 @@ public class Database {
         sessionFactory.close();
     }
 
-    public static <T> boolean insert(T object) {
+    public static boolean insert(Object object) {
         session.beginTransaction();
         try {
             session.save(object);
@@ -48,6 +48,16 @@ public class Database {
             return false;
         }
         return true;
+    }
+
+    public static boolean insertUnique(Object object, String field, Object value) {
+        String stringQuery = String.format("from %s where %s = :value", object.getClass().getSimpleName(), field);
+        Query query = session.createQuery(stringQuery);
+        query.setParameter("value", value);
+        if (query.list().size() > 0) {
+            return false;
+        }
+        return insert(object);
     }
 
     private Database() {
