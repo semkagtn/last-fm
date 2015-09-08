@@ -1,13 +1,5 @@
 package com.semkagtn.lastfm.learning.features;
 
-import com.semkagtn.lastfm.Tracks;
-import com.semkagtn.lastfm.Users;
-import com.semkagtn.lastfm.database.Database;
-import com.semkagtn.lastfm.learning.NumericFeature;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Created by semkagtn on 11.03.15.
  */

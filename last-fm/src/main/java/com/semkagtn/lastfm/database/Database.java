@@ -1,6 +1,5 @@
 package com.semkagtn.lastfm.database;
 
-import com.semkagtn.lastfm.Users;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Query;
 import org.hibernate.Session;

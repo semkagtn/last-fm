@@ -1,13 +1,6 @@
 package com.semkagtn.lastfm;
 
 import com.semkagtn.lastfm.database.Database;
-import com.semkagtn.lastfm.learning.DataSet;
-import com.semkagtn.lastfm.learning.Features;
-import com.semkagtn.lastfm.learning.NominalFeature;
-import com.semkagtn.lastfm.learning.WekaTools;
-import com.semkagtn.lastfm.learning.classes.GenderClass;
-import com.semkagtn.lastfm.learning.features.ArtistsHistogramFeatures;
-import com.semkagtn.lastfm.learning.features.TracksHistogramFeatures;
 
 import java.util.ArrayList;
 import java.util.List;

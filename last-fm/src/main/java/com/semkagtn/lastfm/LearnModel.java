@@ -7,7 +7,6 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Standardize;
 
 import java.io.File;
 import java.util.Random;

@@ -4,8 +4,6 @@ import com.semkagtn.lastfm.database.Database;
 import com.semkagtn.lastfm.httpclient.HttpClient;
 import com.semkagtn.lastfm.httpclient.HttpClientConfig;
 import com.semkagtn.lastfm.lastfmapi.LastFmApi;
-import com.semkagtn.lastfm.lastfmapi.response.ArtistGetInfoResponse;
-import com.semkagtn.lastfm.lastfmapi.response.TrackGetInfoResponse;
 import com.semkagtn.lastfm.utils.EntityConverter;
 import com.semkagtn.lastfm.vkapi.VkApi;
 import com.semkagtn.lastfm.vkapi.response.AudioItem;

@@ -4,8 +4,6 @@ import com.semkagtn.lastfm.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.List;
-
 /**
  * Created by semkagtn on 02.09.15.
  */
