@@ -16,12 +16,19 @@ public class TrackItem {
     @JsonProperty("artist")
     private ArtistItem artist;
 
+    @JsonProperty("toptags")
+    private TagsItem topTags;
+
     public String getName() {
         return name;
     }
 
     public ArtistItem getArtist() {
         return artist;
+    }
+
+    public TagsItem getTopTags() {
+        return topTags;
     }
 
     @Override

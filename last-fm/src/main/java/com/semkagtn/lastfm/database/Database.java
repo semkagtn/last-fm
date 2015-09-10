@@ -1,7 +1,6 @@
 package com.semkagtn.lastfm.database;
 
 import org.hibernate.NonUniqueObjectException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -47,16 +46,6 @@ public class Database {
             return false;
         }
         return true;
-    }
-
-    public static boolean insertUnique(Object object, String field, Object value) {
-        String stringQuery = String.format("from %s where %s = :value", object.getClass().getSimpleName(), field);
-        Query query = session.createQuery(stringQuery);
-        query.setParameter("value", value);
-        if (query.list().size() > 0) {
-            return false;
-        }
-        return insert(object);
     }
 
     private Database() {

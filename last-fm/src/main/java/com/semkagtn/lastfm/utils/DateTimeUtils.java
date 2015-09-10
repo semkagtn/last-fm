@@ -1,7 +1,6 @@
 package com.semkagtn.lastfm.utils;
 
 import org.joda.time.DateTime;
-import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -13,14 +12,13 @@ public class DateTimeUtils {
     private static DateTimeFormatter birthdayDateFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
 
 
-    public static Integer calculateAge(String birthday) {
+    public static Long birthdayToUnixTime(String birthday) {
         if (birthday == null) {
             return null;
         }
         try {
             DateTime birthdayDateTime = birthdayDateFormatter.parseDateTime(birthday);
-            DateTime nowDateTime = DateTime.now();
-            return Years.yearsBetween(birthdayDateTime, nowDateTime).getYears();
+            return birthdayDateTime.getMillis();
         } catch (IllegalArgumentException e) {
             return null;
         }
