@@ -46,7 +46,7 @@ public class LastFmApi {
             } catch (IOException e) {
                 throw new LastFmResponseParseError(e);
             }
-            resultReceived = result.getError() == null || result.getError() != 29;
+            resultReceived = result.getError() == null || result.getError() != LastFmApiErrors.RATE_LIMIT_EXCEEDED;
         }
         return result;
     }

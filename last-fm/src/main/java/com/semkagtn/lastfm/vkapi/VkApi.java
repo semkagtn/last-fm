@@ -49,7 +49,9 @@ public class VkApi {
             }
             if (result.getError() != null) {
                 int errorCode = result.getError().getErrorCode();
-                if (errorCode == 6 || errorCode == 9 || errorCode == 10) {
+                if (errorCode == VkApiErrors.TOO_MANY_REQUESTS_PER_SECOND
+                        || errorCode == VkApiErrors.FLOOD_CONTROL
+                        || errorCode == VkApiErrors.INTERNAL_SERVER_ERROR) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
