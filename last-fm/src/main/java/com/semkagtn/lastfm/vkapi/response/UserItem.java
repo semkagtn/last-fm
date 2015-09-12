@@ -25,6 +25,9 @@ public class UserItem {
     @JsonProperty("music")
     private String music;
 
+    @JsonProperty("counters")
+    private CountersItem counters;
+
     public Integer getSex() {
         return sex;
     }
@@ -43,6 +46,10 @@ public class UserItem {
 
     public int getId() {
         return id;
+    }
+
+    public CountersItem getCounters() {
+        return counters;
     }
 
     @Override

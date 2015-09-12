@@ -1,12 +1,11 @@
 package com.semkagtn.lastfm.vkapi;
 
 import com.semkagtn.lastfm.httpclient.HttpClient;
+import com.semkagtn.lastfm.utils.JsonUtils;
 import com.semkagtn.lastfm.vkapi.response.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,21 +16,23 @@ public class VkApi {
 
     private static final String API_URL = "https://api.vk.com/method/";
     private static final String API_VERSION = "5.37";
-    private static final String FIELDS = "sex,bdate";
+    private static final String FIELDS = "sex,bdate,counters";
 
     private static final String AUDIO_GET = "audio.get";
     private static final String USERS_GET = "users.get";
     private static final String FRIENDS_GET = "friends.get";
     private static final String WALL_GET = "wall.get";
+    private static final String EXECUTE_GET_ATTACHMENTS = "execute.getAttachments";
+
+    private static final int TOO_MANY_REQUESTS_WAIT = 1_100;
+    private static final int CAPTCHA_NEEDED_WAIT = 60_000;
 
     private HttpClient client;
     private String token;
-    private ObjectMapper objectMapper;
 
     public VkApi(HttpClient client, String token) {
         this.client = client;
         this.token = token;
-        this.objectMapper = new ObjectMapper();
     }
 
     private <T extends BaseVkResponse> T call(String method, List<NameValuePair> parameters, Class<T> resultClass) {
@@ -42,21 +43,23 @@ public class VkApi {
         boolean resultReceived = false;
         while (!resultReceived) {
             String response = client.request(API_URL + method, parameters);
-            try {
-                result = objectMapper.readValue(response, resultClass);
-            } catch (IOException e) {
-                throw new VkResponseParseError(e);
-            }
-            if (result.getError() != null) {
+            result = JsonUtils.fromJson(response, resultClass);
+            if (result != null && result.getError() != null) {
                 int errorCode = result.getError().getErrorCode();
-                if (errorCode == VkApiErrors.TOO_MANY_REQUESTS_PER_SECOND
-                        || errorCode == VkApiErrors.FLOOD_CONTROL
-                        || errorCode == VkApiErrors.INTERNAL_SERVER_ERROR) {
+                if (errorCode == VkApiErrors.TOO_MANY_REQUESTS_PER_SECOND) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(TOO_MANY_REQUESTS_WAIT);
                     } catch (InterruptedException e) {
                         // WTF??
                     }
+                } else if (errorCode == VkApiErrors.CAPTCHA_NEEDED) {
+                    try {
+                        Thread.sleep(CAPTCHA_NEEDED_WAIT);
+                    } catch (InterruptedException e) {
+                        // WTF??
+                    }
+                } else if (errorCode == VkApiErrors.FLOOD_CONTROL || errorCode == VkApiErrors.INTERNAL_SERVER_ERROR) {
+                    throw new ApiError(result.getError().toString());
                 } else {
                     resultReceived = true;
                 }
@@ -67,10 +70,10 @@ public class VkApi {
         return result;
     }
 
-    public static class VkResponseParseError extends Error {
+    public static class ApiError extends Error {
 
-        public VkResponseParseError(Throwable cause) {
-            super(cause);
+        public ApiError(String message) {
+            super(message);
         }
     }
 
@@ -116,7 +119,19 @@ public class VkApi {
         if (count != null) {
             parameters.add(new BasicNameValuePair("count", String.valueOf(count)));
         }
-        parameters.add(new BasicNameValuePair("filter", filter.getValue()));
+        if (filter != null) {
+            parameters.add(new BasicNameValuePair("filter", filter.getValue()));
+        }
         return call(WALL_GET, parameters, WallGetResponse.class);
+    }
+
+    public ExecuteGetAttachmentsResponse executeGetAttachments(int userId, int offset, WallGetFilter filter) {
+        List<NameValuePair> parameters = new ArrayList<>();
+        parameters.add(new BasicNameValuePair("owner_id", String.valueOf(userId)));
+        parameters.add(new BasicNameValuePair("offset", String.valueOf(offset)));
+        if (filter != null) {
+            parameters.add(new BasicNameValuePair("filter", filter.getValue()));
+        }
+        return call(EXECUTE_GET_ATTACHMENTS, parameters, ExecuteGetAttachmentsResponse.class);
     }
 }

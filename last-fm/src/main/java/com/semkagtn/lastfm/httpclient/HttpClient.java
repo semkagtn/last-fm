@@ -36,7 +36,7 @@ public class HttpClient {
                         .build())
                 .build();
 
-        this.logger = Logger.getLogger("VK.API");
+        this.logger = Logger.getLogger(this.getClass().getName());
         this.logger.setLevel(config.isLoggerEnabled() ? Level.ALL : Level.OFF);
 
         this.maxRepeatTimes = config.getMaxRepeatTimes();

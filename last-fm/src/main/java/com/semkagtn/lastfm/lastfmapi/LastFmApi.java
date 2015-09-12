@@ -4,6 +4,7 @@ import com.semkagtn.lastfm.httpclient.HttpClient;
 import com.semkagtn.lastfm.lastfmapi.response.ArtistGetInfoResponse;
 import com.semkagtn.lastfm.lastfmapi.response.BaseLastFmResponse;
 import com.semkagtn.lastfm.lastfmapi.response.TrackGetInfoResponse;
+import com.semkagtn.lastfm.utils.JsonUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -24,12 +25,10 @@ public class LastFmApi {
 
     private HttpClient client;
     private String apiKey;
-    private ObjectMapper objectMapper;
 
     public LastFmApi(HttpClient client, String apiKey) {
         this.client = client;
         this.apiKey = apiKey;
-        this.objectMapper = new ObjectMapper();
     }
 
     private <T extends BaseLastFmResponse> T call(String method, List<NameValuePair> parameters, Class<T> resultClass) {
@@ -41,21 +40,11 @@ public class LastFmApi {
         boolean resultReceived = false;
         while (!resultReceived) {
             String response = client.request(API_URL, parameters);
-            try {
-                result = objectMapper.readValue(response, resultClass);
-            } catch (IOException e) {
-                throw new LastFmResponseParseError(e);
-            }
-            resultReceived = result.getError() == null || result.getError() != LastFmApiErrors.RATE_LIMIT_EXCEEDED;
+            result = JsonUtils.fromJson(response, resultClass);
+            resultReceived = result != null && (result.getError() == null
+                    || result.getError() != LastFmApiErrors.RATE_LIMIT_EXCEEDED);
         }
         return result;
-    }
-
-    public static class LastFmResponseParseError extends Error{
-
-        public LastFmResponseParseError(Throwable cause) {
-            super(cause);
-        }
     }
 
     public ArtistGetInfoResponse artistGetInfo(String artist) {

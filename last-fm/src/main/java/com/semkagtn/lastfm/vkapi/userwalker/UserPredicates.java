@@ -17,6 +17,10 @@ public class UserPredicates {
         return user -> user.getSex() != null && (user.getSex().equals(1) || user.getSex().equals(2));
     }
 
+    public static Predicate<UserItem> minimumAudios(int minimumAudios) {
+        return user -> user.getCounters() != null && user.getCounters().getAudios() >= minimumAudios;
+    }
+
     private UserPredicates() {
 
     }

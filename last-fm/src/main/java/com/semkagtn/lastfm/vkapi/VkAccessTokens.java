@@ -12,10 +12,10 @@ public class VkAccessTokens {
     private static Random random = new Random();
 
     private static List<String> tokens = Arrays.asList(
-            "9e034ef437265d930fdec8a8014635d71e37527c199ff4dfd51f9c10d7c775f50c7bb6640c8b43368e701a32ce7a6",
-            "0d640595ca3be978438c6008480c12b60e1232147bbae5351c5cfb0a13398225c16ccef5db29315ef4619",
+            "2177a64b447ae774b2f1a81cc5256ef853d9d981b5a700e104f3a68c2a2d9085091bebd8a7bf6ec4edf716f2b2f54",
+            "69f3f20ee721b8ceb640cc17b0afe052354a823228f1a03882f32f33322c9eb7756a820040772cc71baa159ee28b7",
             "89b406d736315c57754a65c5f3bdf44032d67ed0e1b4a6c4c2238f36a1586e458dd5a78fd162ca3d477bc",
-            "6b1a00451eef00f3ee8803812ffb17550c3da7bdfe758c371c84a0531694a2c6d954c6f7f5da16655f423"
+            "602ad06b0723e4e4063fc6f3ff27e9c04d8b4309d15cbbdb1d61c2c643afff3b5cc56892701c46c39839e33fb9d87"
     );
 
     private VkAccessTokens() {

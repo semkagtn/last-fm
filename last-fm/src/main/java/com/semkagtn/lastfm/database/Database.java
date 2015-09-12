@@ -3,6 +3,7 @@ package com.semkagtn.lastfm.database;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
 
@@ -14,21 +15,12 @@ import java.util.List;
 public class Database {
 
     private static SessionFactory sessionFactory;
-    private static Session session;
+    private static StatelessSession session;
 
     public static void open() {
         Configuration configuration = new Configuration().configure();
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
-    }
-
-    public static <T> T select(Class<T> clazz, String id) {
-        return session.get(clazz, id);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> select(Class<T> clazz) {
-        return (List<T>) session.createCriteria(clazz).list();
+        session = sessionFactory.openStatelessSession();
     }
 
     public static void close() {
@@ -39,7 +31,7 @@ public class Database {
     public static boolean insert(Object object) {
         session.beginTransaction();
         try {
-            session.save(object);
+            session.insert(object);
             session.getTransaction().commit();
         } catch (ConstraintViolationException | NonUniqueObjectException e) {
             session.getTransaction().rollback();

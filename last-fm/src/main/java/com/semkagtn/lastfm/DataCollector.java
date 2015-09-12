@@ -7,22 +7,18 @@ import com.semkagtn.lastfm.lastfmapi.LastFmApi;
 import com.semkagtn.lastfm.lastfmapi.response.*;
 import com.semkagtn.lastfm.utils.EntityConverter;
 import com.semkagtn.lastfm.vkapi.VkApi;
+import com.semkagtn.lastfm.vkapi.audioextractor.PlaylistVkAudioExtractor;
+import com.semkagtn.lastfm.vkapi.audioextractor.VkAudioExtractor;
 import com.semkagtn.lastfm.vkapi.response.AudioItem;
+import com.semkagtn.lastfm.vkapi.response.UserItem;
 import com.semkagtn.lastfm.vkapi.userwalker.PredicateVkUserWalker;
 import com.semkagtn.lastfm.vkapi.userwalker.RandomRecursiveVkUserWalker;
 import com.semkagtn.lastfm.vkapi.userwalker.VkUserWalker;
-import com.semkagtn.lastfm.vkapi.userwithaudioswalker.PredicateVkUserWithAudiosWalker;
-import com.semkagtn.lastfm.vkapi.userwithaudioswalker.SimpleVkUserWithAudiosWalker;
-import com.semkagtn.lastfm.vkapi.userwithaudioswalker.UserWithAudios;
-import com.semkagtn.lastfm.vkapi.userwithaudioswalker.VkUserWithAudiosWalker;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.semkagtn.lastfm.vkapi.userwalker.UserPredicates.hasAge;
-import static com.semkagtn.lastfm.vkapi.userwalker.UserPredicates.hasGender;
-import static com.semkagtn.lastfm.vkapi.userwithaudioswalker.AudioPredicates.minimumAudios;
+import static com.semkagtn.lastfm.vkapi.userwalker.UserPredicates.*;
 
 /**
  * Created by semkagtn on 03.09.15.
@@ -31,18 +27,19 @@ public class DataCollector {
 
     private static final int HTTP_CLIENT_TIMEOUT = 10_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 2;
-    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = true;
+    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = false;
 
     private static final int USER_WALKER_DEPTH = 0;
-    private static final int USER_WALKER_FRIENDS_LIMIT = 3;
+    private static final int USER_WALKER_FRIENDS_LIMIT = 4;
 
-    private static final int AUDIOS_REQUEST_LIMIT = 20;
+    private static final int AUDIOS_REQUEST_LIMIT = 50;
 
-    private static final int USER_AMOUNT = 1;
-    private static final int MINIMUM_AUDIOS = 20;
+    private static final int USER_AMOUNT = 2;
+    private static final int MINIMUM_AUDIOS = 50;
 
     private LastFmApi lastFmApi;
-    private VkUserWithAudiosWalker userWithAudiosWalker;
+    private VkUserWalker userWalker;
+    private VkAudioExtractor audioExtractor;
 
     public DataCollector(String lastFmApiKey, String vkAccessToken) {
         HttpClientConfig config = HttpClientConfig
@@ -56,12 +53,10 @@ public class DataCollector {
         lastFmApi = new LastFmApi(httpClient, lastFmApiKey);
         VkApi vkApi = new VkApi(httpClient, vkAccessToken);
 
-        VkUserWalker userWalker = new PredicateVkUserWalker(
+        userWalker = new PredicateVkUserWalker(
                 new RandomRecursiveVkUserWalker(USER_WALKER_DEPTH, USER_WALKER_FRIENDS_LIMIT, vkApi),
-                hasAge().or(hasGender()));
-        userWithAudiosWalker = new PredicateVkUserWithAudiosWalker(
-                new SimpleVkUserWithAudiosWalker(AUDIOS_REQUEST_LIMIT, userWalker, vkApi),
-                minimumAudios(MINIMUM_AUDIOS));
+                minimumAudios(MINIMUM_AUDIOS).and(hasAge().or(hasGender())));
+        audioExtractor = new PlaylistVkAudioExtractor(vkApi, AUDIOS_REQUEST_LIMIT);
     }
 
     public void collect() {
@@ -74,13 +69,17 @@ public class DataCollector {
     }
 
     private Users collectUser() {
-        UserWithAudios user = userWithAudiosWalker.nextUser();
-        Users userEntity = EntityConverter.convertUser(user.getUser());
+        UserItem user = userWalker.nextUser();
+        List<AudioItem> audios = audioExtractor.getAudios(user.getId());
+        if (audios == null) {
+            return null;
+        }
+        Users userEntity = EntityConverter.convertUser(user);
         boolean inserted = Database.insert(userEntity);
         if (!inserted) {
             return null;
         }
-        for (AudioItem audio : user.getAudios()) {
+        for (AudioItem audio : audios) {
             Tracks trackEntity = collectAudio(audio);
             if (trackEntity != null) {
                 insertUserTrack(userEntity, trackEntity, audio.getDate());
