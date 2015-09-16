@@ -1,4 +1,4 @@
-last-fm/src/main/resources/*.tokens
+musicdatamining/src/main/resources/*.tokens
 .idea
 *.iml
 *.ipr
