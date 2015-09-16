@@ -20,6 +20,7 @@ public class ResourceUtils {
         try {
             String tokensString = IOUtils.toString(classLoader.getResourceAsStream(fileName), Consts.UTF_8);
             return Stream.of(tokensString.split("\n"))
+                    .map(String::trim)
                     .filter(line -> !line.equals(""))
                     .collect(Collectors.toList());
         } catch (IOException e) {
