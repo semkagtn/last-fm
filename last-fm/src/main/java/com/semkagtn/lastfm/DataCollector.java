@@ -29,7 +29,7 @@ import static com.semkagtn.lastfm.vkapi.userwalker.UserPredicates.*;
 public class DataCollector {
 
     private static final int USER_AMOUNT = 5;
-    private static final int AUDIOS_REQUEST_LIMIT = 250;
+    private static final int AUDIOS_REQUEST_LIMIT = 300;
 
     private static final int HTTP_CLIENT_TIMEOUT = 20_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;

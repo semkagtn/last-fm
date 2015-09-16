@@ -1,10 +1,7 @@
 package com.semkagtn.lastfm.httpclient;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -13,6 +10,7 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class HttpClient {
 
-    private static final String ENCODING = "UTF-8";
+    private static final Charset ENCODING = Consts.UTF_8;
 
     private CloseableHttpClient client;
     private Logger logger;

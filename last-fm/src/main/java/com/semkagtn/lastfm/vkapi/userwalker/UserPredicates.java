@@ -26,7 +26,7 @@ public class UserPredicates {
     }
 
     public static Predicate<UserItem> hasAvatar() {
-        return user -> !user.getPhoto50().equals("http://vk.com/images/camera_50.png");
+        return user -> user.getPhoto50() != null && !user.getPhoto50().equals("http://vk.com/images/camera_50.png");
     }
 
     @Deprecated
