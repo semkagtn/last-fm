@@ -2,6 +2,7 @@ package com.semkagtn.lastfm.httpclient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -31,6 +32,7 @@ public class HttpClient {
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setSocketTimeout(config.getTimeout())
                         .setConnectTimeout(config.getTimeout())
+                        .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
                         .build())
                 .build();
 
