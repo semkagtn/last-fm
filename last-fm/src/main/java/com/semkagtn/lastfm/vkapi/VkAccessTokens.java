@@ -10,7 +10,7 @@ import java.util.Random;
  */
 public class VkAccessTokens {
 
-    private static final String FILE_NAME = "vk-tokens.txt";
+    private static final String FILE_NAME = "vk-tokens.tokens";
 
     private static List<String> tokens = ResourceUtils.getFileLines(FILE_NAME);
     private static Random random = new Random();

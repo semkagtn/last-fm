@@ -1,3 +1,4 @@
+last-fm/src/main/resources/*.tokens
 .idea
 *.iml
 *.ipr

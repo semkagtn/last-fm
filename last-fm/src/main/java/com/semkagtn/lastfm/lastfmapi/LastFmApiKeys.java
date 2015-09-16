@@ -10,7 +10,7 @@ import java.util.Random;
  */
 public class LastFmApiKeys {
 
-    private static final String FILE_NAME = "last-fm-api-keys.txt";
+    private static final String FILE_NAME = "last-fm-api-keys.tokens";
 
     private static List<String> apiKeys = ResourceUtils.getFileLines(FILE_NAME);
     private static Random random = new Random();
