@@ -16,7 +16,7 @@ public class VkApi {
 
     private static final String API_URL = "https://api.vk.com/method/";
     private static final String API_VERSION = "5.37";
-    private static final String FIELDS = "sex,bdate,counters";
+    private static final String FIELDS = "sex,bdate,counters,last_seen,photo_50";
 
     private static final String AUDIO_GET = "audio.get";
     private static final String USERS_GET = "users.get";

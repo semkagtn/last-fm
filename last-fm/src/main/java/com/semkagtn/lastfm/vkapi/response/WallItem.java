@@ -2,16 +2,10 @@ package com.semkagtn.lastfm.vkapi.response;
 
 import com.semkagtn.lastfm.utils.JsonUtils;
 import com.semkagtn.lastfm.vkapi.response.deserializer.OnlyAudioAttachmentsDeserializer;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

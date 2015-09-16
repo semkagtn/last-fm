@@ -23,6 +23,10 @@ public class WallVkAudioExtractor implements VkAudioExtractor {
         this.audioLimit = audioLimit;
     }
 
+    public WallVkAudioExtractor(VkApi api) {
+        this(api, Integer.MAX_VALUE);
+    }
+
     @Override
     public List<AudioItem> getAudios(int userId) {
         List<AudioItem> result = null;

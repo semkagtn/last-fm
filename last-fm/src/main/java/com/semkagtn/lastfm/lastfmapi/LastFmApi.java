@@ -7,9 +7,7 @@ import com.semkagtn.lastfm.lastfmapi.response.TrackGetInfoResponse;
 import com.semkagtn.lastfm.utils.JsonUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

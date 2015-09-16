@@ -19,14 +19,14 @@ public class UserItem {
     @JsonProperty("bdate")
     private String bdate;
 
-    @JsonProperty("site")
-    private String site;
-
-    @JsonProperty("music")
-    private String music;
-
     @JsonProperty("counters")
     private CountersItem counters;
+
+    @JsonProperty("photo_50")
+    private String photo50;
+
+    @JsonProperty("last_seen")
+    private LastSeenItem lastSeen;
 
     public Integer getSex() {
         return sex;
@@ -36,20 +36,20 @@ public class UserItem {
         return bdate;
     }
 
-    public String getSite() {
-        return site;
-    }
-
-    public String getMusic() {
-        return music;
-    }
-
     public int getId() {
         return id;
     }
 
     public CountersItem getCounters() {
         return counters;
+    }
+
+    public String getPhoto50() {
+        return photo50;
+    }
+
+    public LastSeenItem getLastSeen() {
+        return lastSeen;
     }
 
     @Override

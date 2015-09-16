@@ -1,4 +1,4 @@
-package com.semkagtn.lastfm.utils;
+package com.semkagtn.lastfm.database;
 
 import com.semkagtn.lastfm.Artists;
 import com.semkagtn.lastfm.Tags;
@@ -7,6 +7,8 @@ import com.semkagtn.lastfm.Users;
 import com.semkagtn.lastfm.lastfmapi.response.ArtistItem;
 import com.semkagtn.lastfm.lastfmapi.response.TagItem;
 import com.semkagtn.lastfm.lastfmapi.response.TrackItem;
+import com.semkagtn.lastfm.utils.DateTimeUtils;
+import com.semkagtn.lastfm.utils.HashUtils;
 import com.semkagtn.lastfm.vkapi.response.UserItem;
 
 /**
@@ -29,9 +31,10 @@ public class EntityConverter {
         return artists;
     }
 
-    public static Tracks convertTrack(TrackItem trackItem) {
+    public static Tracks convertTrack(TrackItem trackItem, int genreId) {
         Tracks tracks = new Tracks();
         tracks.setTrackName(trackItem.getName());
+        tracks.setGenre(genreId >= 1 && genreId <= 22 ? genreId : 18);
         String artistName = trackItem.getArtist() != null ? trackItem.getArtist().getName() : "";
         tracks.setId(HashUtils.md5(trackItem.getName() + artistName));
         return tracks;

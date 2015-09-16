@@ -1,20 +1,23 @@
 package com.semkagtn.lastfm;
 
 import com.semkagtn.lastfm.database.Database;
+import com.semkagtn.lastfm.database.EntityConverter;
 import com.semkagtn.lastfm.httpclient.HttpClient;
 import com.semkagtn.lastfm.httpclient.HttpClientConfig;
 import com.semkagtn.lastfm.lastfmapi.LastFmApi;
 import com.semkagtn.lastfm.lastfmapi.response.*;
-import com.semkagtn.lastfm.utils.EntityConverter;
 import com.semkagtn.lastfm.vkapi.VkApi;
+import com.semkagtn.lastfm.vkapi.audioextractor.CompositeVkAudioExtractor;
 import com.semkagtn.lastfm.vkapi.audioextractor.PlaylistVkAudioExtractor;
 import com.semkagtn.lastfm.vkapi.audioextractor.VkAudioExtractor;
+import com.semkagtn.lastfm.vkapi.audioextractor.WallVkAudioExtractor;
 import com.semkagtn.lastfm.vkapi.response.AudioItem;
 import com.semkagtn.lastfm.vkapi.response.UserItem;
 import com.semkagtn.lastfm.vkapi.userwalker.PredicateVkUserWalker;
 import com.semkagtn.lastfm.vkapi.userwalker.RandomRecursiveVkUserWalker;
 import com.semkagtn.lastfm.vkapi.userwalker.VkUserWalker;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,17 +28,18 @@ import static com.semkagtn.lastfm.vkapi.userwalker.UserPredicates.*;
  */
 public class DataCollector {
 
-    private static final int HTTP_CLIENT_TIMEOUT = 10_000;
-    private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 2;
-    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = false;
+    private static final int USER_AMOUNT = 50;
+    private static final int AUDIOS_REQUEST_LIMIT = 150;
 
-    private static final int USER_WALKER_DEPTH = 0;
-    private static final int USER_WALKER_FRIENDS_LIMIT = 4;
+    private static final int HTTP_CLIENT_TIMEOUT = 20_000;
+    private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;
+    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = true;
 
-    private static final int AUDIOS_REQUEST_LIMIT = 50;
+    private static final int USER_WALKER_DEPTH = 2;
+    private static final int USER_WALKER_FRIENDS_LIMIT = 2;
 
-    private static final int USER_AMOUNT = 2;
-    private static final int MINIMUM_AUDIOS = 50;
+    private static final int MINIMUM_AUDIOS = 50; // minimum audios in playlist
+    private static final int MAX_LAST_SEEN_DAYS = 60;
 
     private LastFmApi lastFmApi;
     private VkUserWalker userWalker;
@@ -55,8 +59,13 @@ public class DataCollector {
 
         userWalker = new PredicateVkUserWalker(
                 new RandomRecursiveVkUserWalker(USER_WALKER_DEPTH, USER_WALKER_FRIENDS_LIMIT, vkApi),
-                minimumAudios(MINIMUM_AUDIOS).and(hasAge().or(hasGender())));
-        audioExtractor = new PlaylistVkAudioExtractor(vkApi, AUDIOS_REQUEST_LIMIT);
+                minimumAudios(MINIMUM_AUDIOS).and(
+                        hasAvatar().and(
+                                hasAge().or(hasGender()))));
+        VkAudioExtractor playlistAudioExtractor = new PlaylistVkAudioExtractor(vkApi);
+        VkAudioExtractor wallAudioExtractor = new WallVkAudioExtractor(vkApi);
+        audioExtractor = new CompositeVkAudioExtractor(
+                Arrays.asList(playlistAudioExtractor, wallAudioExtractor), AUDIOS_REQUEST_LIMIT);
     }
 
     public void collect() {
@@ -94,7 +103,7 @@ public class DataCollector {
             return null;
         }
         TrackItem track = trackGetInfoResponse.getTrack();
-        Tracks trackEntity = EntityConverter.convertTrack(track);
+        Tracks trackEntity = EntityConverter.convertTrack(track, audio.getGenreId());
         Artists artistEntity = null;
         if (track.getArtist() != null) {
             artistEntity = collectArtist(track.getArtist());

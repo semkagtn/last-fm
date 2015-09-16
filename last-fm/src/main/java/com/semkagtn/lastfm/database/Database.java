@@ -1,13 +1,10 @@
 package com.semkagtn.lastfm.database;
 
 import org.hibernate.NonUniqueObjectException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
-
-import java.util.List;
 
 /**
  * Created by semkagtn on 11.03.15.
