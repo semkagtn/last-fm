@@ -28,18 +28,16 @@ import static com.semkagtn.lastfm.vkapi.userwalker.UserPredicates.*;
  */
 public class DataCollector {
 
-    private static final int USER_AMOUNT = 50;
-    private static final int AUDIOS_REQUEST_LIMIT = 150;
+    private static final int USER_AMOUNT = 5;
+    private static final int AUDIOS_REQUEST_LIMIT = 250;
 
     private static final int HTTP_CLIENT_TIMEOUT = 20_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;
     private static final boolean HTTP_CLIENT_LOGGER_ENABLED = true;
 
     private static final int USER_WALKER_DEPTH = 2;
-    private static final int USER_WALKER_FRIENDS_LIMIT = 2;
+    private static final int USER_WALKER_FRIENDS_LIMIT = 5;
 
-    private static final int MINIMUM_AUDIOS = 50; // minimum audios in playlist
-    private static final int MAX_LAST_SEEN_DAYS = 60;
 
     private LastFmApi lastFmApi;
     private VkUserWalker userWalker;
@@ -59,9 +57,7 @@ public class DataCollector {
 
         userWalker = new PredicateVkUserWalker(
                 new RandomRecursiveVkUserWalker(USER_WALKER_DEPTH, USER_WALKER_FRIENDS_LIMIT, vkApi),
-                minimumAudios(MINIMUM_AUDIOS).and(
-                        hasAvatar().and(
-                                hasAge().or(hasGender()))));
+                hasAvatar().and(hasAge().or(hasGender())));
         VkAudioExtractor playlistAudioExtractor = new PlaylistVkAudioExtractor(vkApi);
         VkAudioExtractor wallAudioExtractor = new WallVkAudioExtractor(vkApi);
         audioExtractor = new CompositeVkAudioExtractor(

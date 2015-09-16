@@ -19,7 +19,9 @@ public class UserPredicates {
         return user -> user.getSex() != null && (user.getSex().equals(1) || user.getSex().equals(2));
     }
 
+    @Deprecated
     public static Predicate<UserItem> minimumAudios(int minimumAudios) {
+        // VK API not returns required field in several ways. Better not to use this.
         return user -> user.getCounters() != null && user.getCounters().getAudios() >= minimumAudios;
     }
 
@@ -27,8 +29,9 @@ public class UserPredicates {
         return user -> !user.getPhoto50().equals("http://vk.com/images/camera_50.png");
     }
 
+    @Deprecated
     public static Predicate<UserItem> lastSeenNoMoreDaysThen(int days) {
-        // TODO Incorrect implementation
+        // VK API returns invalid last seen time. Do not use this!
         return user -> {
             if (user.getLastSeen() == null || user.getLastSeen().getTime() == null) {
                 return false;

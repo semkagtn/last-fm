@@ -27,7 +27,10 @@ public class CompositeVkAudioExtractor implements VkAudioExtractor {
     public List<AudioItem> getAudios(int userId) {
         List<AudioItem> result = new ArrayList<>();
         for (VkAudioExtractor audioExtractor : audioExtractors) {
-            result.addAll(audioExtractor.getAudios(userId));
+            List<AudioItem> audios = audioExtractor.getAudios(userId);
+            if (audios != null) {
+                result.addAll(audios);
+            }
         }
         return result.stream().limit(audiosLimit).collect(Collectors.toList());
     }
