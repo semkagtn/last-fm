@@ -1,5 +1,6 @@
 package com.semkagtn.musicdatamining.database;
 
+
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
@@ -9,23 +10,23 @@ import org.hibernate.exception.ConstraintViolationException;
 /**
  * Created by semkagtn on 11.03.15.
  */
-public class Database {
+public class DatabaseHelper {
 
-    private static SessionFactory sessionFactory;
-    private static StatelessSession session;
+    private SessionFactory sessionFactory;
+    private StatelessSession session;
 
-    public static void open() {
+    public DatabaseHelper() {
         Configuration configuration = new Configuration().configure();
         sessionFactory = configuration.buildSessionFactory();
         session = sessionFactory.openStatelessSession();
     }
 
-    public static void close() {
+    public void close() {
         session.close();
         sessionFactory.close();
     }
 
-    public static boolean insert(Object object) {
+    public boolean insert(Object object) {
         session.beginTransaction();
         try {
             session.insert(object);
@@ -35,9 +36,5 @@ public class Database {
             return false;
         }
         return true;
-    }
-
-    private Database() {
-
     }
 }

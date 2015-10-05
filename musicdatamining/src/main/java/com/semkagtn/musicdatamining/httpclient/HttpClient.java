@@ -24,8 +24,9 @@ public class HttpClient {
     private static final Charset ENCODING = Consts.UTF_8;
 
     private CloseableHttpClient client;
-    private Logger logger;
     private int maxRepeatTimes;
+    private boolean isLoggerEnabled;
+    private Logger logger;
 
     public HttpClient(HttpClientConfig config) {
         this.client = HttpClients.custom()
@@ -36,10 +37,15 @@ public class HttpClient {
                         .build())
                 .build();
 
-        this.logger = Logger.getLogger(this.getClass().getName());
-        this.logger.setLevel(config.isLoggerEnabled() ? Level.ALL : Level.OFF);
-
         this.maxRepeatTimes = config.getMaxRepeatTimes();
+        this.isLoggerEnabled = config.isLoggerEnabled();
+
+        this.setLogger(Logger.getLogger(this.getClass().getName()));
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+        this.logger.setLevel(isLoggerEnabled ? Level.ALL : Level.OFF);
     }
 
     public String request(String url, List<NameValuePair> parameters) {

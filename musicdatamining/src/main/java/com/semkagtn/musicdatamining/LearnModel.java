@@ -16,8 +16,7 @@ import java.util.Random;
  */
 public class LearnModel {
 
-    private static final int T = 5;
-    private static final int Q = 5;
+    private static final int K = 5;
 
     public static void main(String[] args) throws Exception {
         File file = new File("gender-same-top-3000-artists.arff");
@@ -31,9 +30,7 @@ public class LearnModel {
         classifier.buildClassifier(instances);
 
         Evaluation evaluation = new Evaluation(instances);
-        for (int i = 0; i < T; i++) {
-            evaluation.crossValidateModel(classifier, instances, Q, new Random());
-        }
+        evaluation.crossValidateModel(classifier, instances, K, new Random());
         System.out.println(evaluation.toSummaryString());
     }
 }

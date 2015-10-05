@@ -1,6 +1,6 @@
 package com.semkagtn.musicdatamining;
 
-import com.semkagtn.musicdatamining.database.Database;
+import com.semkagtn.musicdatamining.database.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class CreateArff {
     private static final int TOP_TRACKS = 5000;
 
     public static void main(String[] args) throws Exception {
-        Database.open();
+//        DatabaseHelper.open();
 //        try {
 //            List<Users> users = Database.select(Users.class, "gender <> 'n'");
 //            users = sameCountOfMalesAndFemales(users);

@@ -1,6 +1,6 @@
 package com.semkagtn.musicdatamining;
 
-import com.semkagtn.musicdatamining.database.Database;
+import com.semkagtn.musicdatamining.database.DatabaseHelper;
 import com.semkagtn.musicdatamining.database.EntityConverter;
 import com.semkagtn.musicdatamining.httpclient.HttpClient;
 import com.semkagtn.musicdatamining.httpclient.HttpClientConfig;
@@ -19,6 +19,7 @@ import com.semkagtn.musicdatamining.vkapi.userwalker.VkUserWalker;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.semkagtn.musicdatamining.vkapi.userwalker.UserPredicates.*;
@@ -28,22 +29,24 @@ import static com.semkagtn.musicdatamining.vkapi.userwalker.UserPredicates.*;
  */
 public class DataCollector {
 
-    private static final int USER_AMOUNT = 5;
-    private static final int AUDIOS_REQUEST_LIMIT = 300;
+    private static final int USER_AMOUNT = 50;
+    private static final int AUDIOS_REQUEST_LIMIT = 250;
+    private static final int MINIMUM_AUDIOS = 100;
 
-    private static final int HTTP_CLIENT_TIMEOUT = 20_000;
+    private static final int HTTP_CLIENT_TIMEOUT = 30_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;
-    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = true;
+    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = false;
 
     private static final int USER_WALKER_DEPTH = 2;
-    private static final int USER_WALKER_FRIENDS_LIMIT = 5;
+    private static final int USER_WALKER_FRIENDS_LIMIT = 3;
 
 
     private LastFmApi lastFmApi;
     private VkUserWalker userWalker;
     private VkAudioExtractor audioExtractor;
+    private DatabaseHelper databaseHelper;
 
-    public DataCollector(String lastFmApiKey, String vkAccessToken) {
+    public DataCollector(String lastFmApiKey, String vkAccessToken, Logger logger) {
         HttpClientConfig config = HttpClientConfig
                 .newInstance()
                 .withTimeout(HTTP_CLIENT_TIMEOUT)
@@ -51,6 +54,9 @@ public class DataCollector {
                 .withLoggerEnabled(HTTP_CLIENT_LOGGER_ENABLED)
                 .build();
         HttpClient httpClient = new HttpClient(config);
+        if (logger != null) {
+            httpClient.setLogger(logger);
+        }
 
         lastFmApi = new LastFmApi(httpClient, lastFmApiKey);
         VkApi vkApi = new VkApi(httpClient, vkAccessToken);
@@ -58,10 +64,17 @@ public class DataCollector {
         userWalker = new PredicateVkUserWalker(
                 new RandomRecursiveVkUserWalker(USER_WALKER_DEPTH, USER_WALKER_FRIENDS_LIMIT, vkApi),
                 hasAvatar().and(hasAge().or(hasGender())));
+
         VkAudioExtractor playlistAudioExtractor = new PlaylistVkAudioExtractor(vkApi);
         VkAudioExtractor wallAudioExtractor = new WallVkAudioExtractor(vkApi);
         audioExtractor = new CompositeVkAudioExtractor(
                 Arrays.asList(playlistAudioExtractor, wallAudioExtractor), AUDIOS_REQUEST_LIMIT);
+
+        databaseHelper = new DatabaseHelper();
+    }
+
+    public DataCollector(String lastFmApiKey, String vkAccessToken) {
+        this(lastFmApiKey, vkAccessToken, null);
     }
 
     public void collect() {
@@ -71,16 +84,17 @@ public class DataCollector {
                 i++;
             }
         }
+        databaseHelper.close();
     }
 
     private Users collectUser() {
         UserItem user = userWalker.nextUser();
         List<AudioItem> audios = audioExtractor.getAudios(user.getId());
-        if (audios == null) {
+        if (audios == null || audios.size() < MINIMUM_AUDIOS) {
             return null;
         }
         Users userEntity = EntityConverter.convertUser(user);
-        boolean inserted = Database.insert(userEntity);
+        boolean inserted = databaseHelper.insert(userEntity);
         if (!inserted) {
             return null;
         }
@@ -105,7 +119,7 @@ public class DataCollector {
             artistEntity = collectArtist(track.getArtist());
         }
         trackEntity.setArtists(artistEntity);
-        Database.insert(trackEntity);
+        databaseHelper.insert(trackEntity);
         if (track.getTopTags() == null || track.getTopTags().getTag() == null) {
             return trackEntity;
         }
@@ -117,7 +131,7 @@ public class DataCollector {
 
     private Artists collectArtist(ArtistItem artist) {
         Artists artistEntity = EntityConverter.convertArtist(artist);
-        boolean artistInserted = Database.insert(artistEntity);
+        boolean artistInserted = databaseHelper.insert(artistEntity);
         if (!artistInserted) {
             return artistEntity;
         }
@@ -133,13 +147,13 @@ public class DataCollector {
         return artistEntity;
     }
 
-    private static List<Tags> collectTags(List<TagItem> tagItems) {
+    private List<Tags> collectTags(List<TagItem> tagItems) {
         List<Tags> tagEntities = tagItems.stream().map(EntityConverter::convertTag).collect(Collectors.toList());
-        tagEntities.forEach(Database::insert);
+        tagEntities.forEach(databaseHelper::insert);
         return tagEntities;
     }
 
-    private static void insertUserTrack(Users user, Tracks track, long addedWhen) {
+    private void insertUserTrack(Users user, Tracks track, long addedWhen) {
         UsersTracksId id = new UsersTracksId();
         id.setUserId(user.getId());
         id.setTrackId(track.getId());
@@ -149,10 +163,10 @@ public class DataCollector {
         usersTracks.setUsers(user);
         usersTracks.setTracks(track);
         usersTracks.setAddedWhen(addedWhen);
-        Database.insert(usersTracks);
+        databaseHelper.insert(usersTracks);
     }
 
-    private static void insertArtistTags(Artists artist, List<Tags> tags) {
+    private void insertArtistTags(Artists artist, List<Tags> tags) {
         for (int i = 0; i < tags.size(); i++) {
             Tags tagEntity = tags.get(i);
 
@@ -165,11 +179,11 @@ public class DataCollector {
             artistsTags.setTags(tagEntity);
             artistsTags.setArtists(artist);
             artistsTags.setPosition(i + 1);
-            Database.insert(artistsTags);
+            databaseHelper.insert(artistsTags);
         }
     }
 
-    private static void insertTrackTags(Tracks track, List<Tags> tags) {
+    private void insertTrackTags(Tracks track, List<Tags> tags) {
         for (int i = 0; i < tags.size(); i++) {
             Tags tagEntity = tags.get(i);
 
@@ -182,7 +196,7 @@ public class DataCollector {
             trackTags.setTags(tagEntity);
             trackTags.setTracks(track);
             trackTags.setPosition(i + 1);
-            Database.insert(trackTags);
+            databaseHelper.insert(trackTags);
         }
     }
 }
