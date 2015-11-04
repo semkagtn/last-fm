@@ -6,16 +6,17 @@ import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.GenericJDBCException;
 
 /**
  * Created by semkagtn on 11.03.15.
  */
-public class DatabaseHelper {
+public class DatabaseWriterHelper {
 
     private SessionFactory sessionFactory;
     private StatelessSession session;
 
-    public DatabaseHelper() {
+    public DatabaseWriterHelper() {
         Configuration configuration = new Configuration().configure();
         sessionFactory = configuration.buildSessionFactory();
         session = sessionFactory.openStatelessSession();
@@ -31,7 +32,7 @@ public class DatabaseHelper {
         try {
             session.insert(object);
             session.getTransaction().commit();
-        } catch (ConstraintViolationException | NonUniqueObjectException e) {
+        } catch (ConstraintViolationException | NonUniqueObjectException | GenericJDBCException e) {
             session.getTransaction().rollback();
             return false;
         }

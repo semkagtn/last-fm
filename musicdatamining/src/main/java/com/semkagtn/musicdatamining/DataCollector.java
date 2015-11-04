@@ -1,6 +1,6 @@
 package com.semkagtn.musicdatamining;
 
-import com.semkagtn.musicdatamining.database.DatabaseHelper;
+import com.semkagtn.musicdatamining.database.DatabaseWriterHelper;
 import com.semkagtn.musicdatamining.database.EntityConverter;
 import com.semkagtn.musicdatamining.httpclient.HttpClient;
 import com.semkagtn.musicdatamining.httpclient.HttpClientConfig;
@@ -35,16 +35,15 @@ public class DataCollector {
 
     private static final int HTTP_CLIENT_TIMEOUT = 30_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;
-    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = false;
+    private static final boolean HTTP_CLIENT_LOGGER_ENABLED = true;
 
     private static final int USER_WALKER_DEPTH = 2;
     private static final int USER_WALKER_FRIENDS_LIMIT = 3;
 
-
     private LastFmApi lastFmApi;
     private VkUserWalker userWalker;
     private VkAudioExtractor audioExtractor;
-    private DatabaseHelper databaseHelper;
+    private DatabaseWriterHelper databaseWriterHelper;
 
     public DataCollector(String lastFmApiKey, String vkAccessToken, Logger logger) {
         HttpClientConfig config = HttpClientConfig
@@ -70,7 +69,7 @@ public class DataCollector {
         audioExtractor = new CompositeVkAudioExtractor(
                 Arrays.asList(playlistAudioExtractor, wallAudioExtractor), AUDIOS_REQUEST_LIMIT);
 
-        databaseHelper = new DatabaseHelper();
+        databaseWriterHelper = new DatabaseWriterHelper();
     }
 
     public DataCollector(String lastFmApiKey, String vkAccessToken) {
@@ -78,13 +77,16 @@ public class DataCollector {
     }
 
     public void collect() {
-        for (int i = 0; i < USER_AMOUNT;) {
-            Users user = collectUser();
-            if (user != null) {
-                i++;
+        try {
+            for (int i = 0; i < USER_AMOUNT; ) {
+                Users user = collectUser();
+                if (user != null) {
+                    i++;
+                }
             }
+        } finally {
+            databaseWriterHelper.close();
         }
-        databaseHelper.close();
     }
 
     private Users collectUser() {
@@ -94,7 +96,7 @@ public class DataCollector {
             return null;
         }
         Users userEntity = EntityConverter.convertUser(user);
-        boolean inserted = databaseHelper.insert(userEntity);
+        boolean inserted = databaseWriterHelper.insert(userEntity);
         if (!inserted) {
             return null;
         }
@@ -119,7 +121,7 @@ public class DataCollector {
             artistEntity = collectArtist(track.getArtist());
         }
         trackEntity.setArtists(artistEntity);
-        databaseHelper.insert(trackEntity);
+        databaseWriterHelper.insert(trackEntity);
         if (track.getTopTags() == null || track.getTopTags().getTag() == null) {
             return trackEntity;
         }
@@ -131,7 +133,7 @@ public class DataCollector {
 
     private Artists collectArtist(ArtistItem artist) {
         Artists artistEntity = EntityConverter.convertArtist(artist);
-        boolean artistInserted = databaseHelper.insert(artistEntity);
+        boolean artistInserted = databaseWriterHelper.insert(artistEntity);
         if (!artistInserted) {
             return artistEntity;
         }
@@ -149,7 +151,7 @@ public class DataCollector {
 
     private List<Tags> collectTags(List<TagItem> tagItems) {
         List<Tags> tagEntities = tagItems.stream().map(EntityConverter::convertTag).collect(Collectors.toList());
-        tagEntities.forEach(databaseHelper::insert);
+        tagEntities.forEach(databaseWriterHelper::insert);
         return tagEntities;
     }
 
@@ -163,7 +165,7 @@ public class DataCollector {
         usersTracks.setUsers(user);
         usersTracks.setTracks(track);
         usersTracks.setAddedWhen(addedWhen);
-        databaseHelper.insert(usersTracks);
+        databaseWriterHelper.insert(usersTracks);
     }
 
     private void insertArtistTags(Artists artist, List<Tags> tags) {
@@ -179,7 +181,7 @@ public class DataCollector {
             artistsTags.setTags(tagEntity);
             artistsTags.setArtists(artist);
             artistsTags.setPosition(i + 1);
-            databaseHelper.insert(artistsTags);
+            databaseWriterHelper.insert(artistsTags);
         }
     }
 
@@ -196,7 +198,7 @@ public class DataCollector {
             trackTags.setTags(tagEntity);
             trackTags.setTracks(track);
             trackTags.setPosition(i + 1);
-            databaseHelper.insert(trackTags);
+            databaseWriterHelper.insert(trackTags);
         }
     }
 }

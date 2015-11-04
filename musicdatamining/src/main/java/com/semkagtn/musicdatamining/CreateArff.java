@@ -1,7 +1,5 @@
 package com.semkagtn.musicdatamining;
 
-import com.semkagtn.musicdatamining.database.DatabaseHelper;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

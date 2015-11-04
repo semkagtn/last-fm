@@ -58,7 +58,7 @@ public class VkApi {
                     } catch (InterruptedException e) {
                         // WTF??
                     }
-                } else if (errorCode == VkApiErrors.FLOOD_CONTROL || errorCode == VkApiErrors.INTERNAL_SERVER_ERROR) {
+                } else if (errorCode == VkApiErrors.FLOOD_CONTROL) {
                     throw new ApiError(result.getError().toString());
                 } else {
                     resultReceived = true;

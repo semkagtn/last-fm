@@ -34,7 +34,7 @@ public class EntityConverter {
     public static Tracks convertTrack(TrackItem trackItem, int genreId) {
         Tracks tracks = new Tracks();
         tracks.setTrackName(trackItem.getName());
-        tracks.setGenre(genreId >= 1 && genreId <= 22 ? genreId : 18);
+        tracks.setGenre(genreId >= 1 && genreId <= 22 && genreId != 20 ? genreId : 18);
         String artistName = trackItem.getArtist() != null ? trackItem.getArtist().getName() : "";
         tracks.setId(HashUtils.md5(trackItem.getName() + artistName));
         return tracks;

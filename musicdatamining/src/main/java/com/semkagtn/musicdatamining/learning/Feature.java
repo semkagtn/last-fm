@@ -3,25 +3,26 @@ package com.semkagtn.musicdatamining.learning;
 import com.semkagtn.musicdatamining.Users;
 import weka.core.Attribute;
 
+import java.util.function.Function;
+
 /**
- * Created by semkagtn on 2/15/15.
+ * Created by semkagtn on 03.11.15.
  */
-public abstract class Feature<T> {
+public class Feature<T> {
 
-    protected Attribute attribute;
-    private String name;
+    private Attribute attribute;
+    private Function<Users, T> function;
 
-    protected Feature(String name) {
-        this.name = name;
+    public Feature(Attribute attribute, Function<Users, T> function) {
+        this.attribute = attribute;
+        this.function = function;
     }
 
-    public final String getName() {
-        return name;
-    }
-
-    public final Attribute getAttribute() {
+    public Attribute getAttribute() {
         return attribute;
     }
 
-    public abstract T calculate(Users user);
+    public T calculate(Users users) {
+        return function.apply(users);
+    }
 }
