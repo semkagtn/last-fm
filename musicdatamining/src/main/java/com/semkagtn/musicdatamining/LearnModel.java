@@ -5,12 +5,15 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.LibSVM;
+import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.meta.Bagging;
 import weka.classifiers.meta.RandomCommittee;
 import weka.classifiers.rules.DecisionTable;
 import weka.classifiers.trees.BFTree;
+import weka.classifiers.trees.J48;
+import weka.classifiers.trees.M5P;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.filters.Filter;
@@ -22,9 +25,9 @@ import java.util.Random;
 /**
  * Created by semkagtn on 04.11.15.
  */
-public class Main2 {
+public class LearnModel {
 
-    private static final String TRAINING_SET_FILE_NAME = "trainingSetArtistTags.arff";
+    private static final String TRAINING_SET_FILE_NAME = "trainingSetArtistsTags.arff";
     private static final int K = 10;
 
     public static void main(String[] args) throws Exception {
@@ -34,7 +37,7 @@ public class Main2 {
         normalize.setInputFormat(trainingSet);
         trainingSet = Filter.useFilter(trainingSet, normalize);
 
-        Classifier classifier = new Logistic();
+        Classifier classifier = new LibSVM();
 
         Evaluation evaluation = new Evaluation(trainingSet);
         evaluation.crossValidateModel(classifier, trainingSet, K, new Random());

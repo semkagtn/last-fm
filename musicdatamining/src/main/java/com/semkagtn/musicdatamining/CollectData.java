@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 /**
  * Created by semkagtn on 20.07.15.
  */
-public class Main {
+public class CollectData {
 
     private static final int THREAD_COUNT = 4;
 

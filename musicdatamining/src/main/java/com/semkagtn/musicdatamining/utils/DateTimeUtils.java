@@ -24,6 +24,15 @@ public class DateTimeUtils {
         }
     }
 
+    public static Integer unixTimeToAge(Long unixTime) {
+        if (unixTime == null) {
+            return null;
+        }
+        DateTime birthDay = new DateTime(unixTime);
+        DateTime now = new DateTime();
+        return now.getYear() - birthDay.getYear();
+    }
+
     private DateTimeUtils() {
 
     }

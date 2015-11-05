@@ -8,7 +8,7 @@ import java.util.function.Function;
 /**
  * Created by semkagtn on 03.11.15.
  */
-public class Feature<T> {
+public abstract class Feature<T> {
 
     private Attribute attribute;
     private Function<Users, T> function;
@@ -25,4 +25,10 @@ public class Feature<T> {
     public T calculate(Users users) {
         return function.apply(users);
     }
+
+    public boolean isNumeric() {
+        return !isNominal();
+    }
+
+    public abstract boolean isNominal();
 }

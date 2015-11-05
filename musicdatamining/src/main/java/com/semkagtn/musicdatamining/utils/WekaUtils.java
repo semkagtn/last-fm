@@ -3,6 +3,8 @@ package com.semkagtn.musicdatamining.utils;
 import com.semkagtn.musicdatamining.Users;
 import com.semkagtn.musicdatamining.learning.Feature;
 import com.semkagtn.musicdatamining.learning.MultiFeature;
+import com.semkagtn.musicdatamining.learning.NominalFeature;
+import com.semkagtn.musicdatamining.learning.NumericFeature;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -24,16 +26,16 @@ public class WekaUtils {
 
     private static Logger logger = Logger.getLogger(WekaUtils.class.getName());
 
-    public static Instances generateTrainingSet(List<Users> users,
-                                 List<MultiFeature<Double>> multiFeatures,
-                                 Feature<String> clazz,
-                                 String name) {
+    public static Instances generateAgeTrainingSet(List<Users> users,
+                                                   List<MultiFeature<Double>> multiFeatures,
+                                                   Feature<?> output,
+                                                   String name) {
         List<Attribute> allAttributes = multiFeatures.stream()
                 .flatMap(multiFeature -> multiFeature.getAttributes().stream())
                 .collect(Collectors.toList());
         FastVector attributesVector = new FastVector(allAttributes.size() + 1);
         allAttributes.forEach(attributesVector::addElement);
-        attributesVector.addElement(clazz.getAttribute());
+        attributesVector.addElement(output.getAttribute());
 
         Instances instances = new Instances(name, attributesVector, users.size());
         instances.setClassIndex(attributesVector.size() - 1);
@@ -49,10 +51,15 @@ public class WekaUtils {
                     instance.setValue(attribute, value);
                 }
             }
-            instance.setValue(clazz.getAttribute(), clazz.calculate(user));
+            if (output.isNominal()) {
+                NominalFeature clazz = (NominalFeature) output;
+                instance.setValue(clazz.getAttribute(), clazz.calculate(user));
+            } else {
+                NumericFeature numericOutput = (NumericFeature) output;
+                instance.setValue(numericOutput.getAttribute(), numericOutput.calculate(user));
+            }
             instances.add(instance);
         }
-
         return instances;
     }
 

@@ -15,31 +15,34 @@ import java.util.stream.Collectors;
 /**
  * Created by semkagtn on 03.11.15.
  */
-public class Main1 {
+public class GenerateTrainingSet {
 
     private static final int MINIMUM_TRACKS = 100;
-    private static final int TOP_TAGS = 20;
+    private static final int TOP_TAGS = 40;
+    private static final int TOP_ARTISTS = 10;
 
     public static void main(String[] args) throws IOException {
         DatabaseReaderHelper database = new DatabaseReaderHelper();
-
         List<Users> users = database.selectAll(Users.class).stream()
                 .filter(user -> user.getGender() != null)
                 .filter(user -> user.getUsersTrackses().size() >= MINIMUM_TRACKS)
                 .collect(Collectors.toList());
+//        users = alignGender(users);
 
+//        long birthdayMedian = birthdayMedian(users);
         List<GenresDict> genres = database.selectAll(GenresDict.class);
-        List<Tags> tags = database.topArtistsTags(TOP_TAGS);
+        List<Tags> artistsTags = database.topArtistsTags(TOP_TAGS);
+        List<Tags> tracksTags = database.topTracksTags(TOP_TAGS);
+        List<Artists> artists = database.topArtists(TOP_ARTISTS);
 
         List<MultiFeature<Double>> features = new ArrayList<>();
-        features.add(Features.genreHistogram(genres));
-        features.add(Features.artistTagsHistogram(tags));
+        features.add(Features.artistTagsHistogram(artistsTags));
 
-        Feature<String> clazz = Features.gender();
+        Feature<?> output = Features.gender();
 
-        String trainingSetName = "trainingSetArtistTagsAndGenres";
+        String trainingSetName = "trainingSetArtistsTags";
 
-        Instances instances = WekaUtils.generateTrainingSet(users, features, clazz, trainingSetName);
+        Instances instances = WekaUtils.generateAgeTrainingSet(users, features, output, trainingSetName);
         WekaUtils.writeArffFile(instances);
 
         database.close();
@@ -61,5 +64,13 @@ public class Main1 {
         result.addAll(male);
         result.addAll(female);
         return result;
+    }
+
+    private static long birthdayMedian(List<Users> users) {
+        List<Long> birthdays = users.stream()
+                .map(Users::getBirthday)
+                .sorted()
+                .collect(Collectors.toList());
+        return birthdays.get(birthdays.size() / 2);
     }
 }
