@@ -29,9 +29,9 @@ import static com.semkagtn.musicdatamining.vkapi.userwalker.UserPredicates.*;
  */
 public class DataCollector {
 
-    private static final int USER_AMOUNT = 50;
+    private static final int USER_AMOUNT = 35;
     private static final int AUDIOS_REQUEST_LIMIT = 250;
-    private static final int MINIMUM_AUDIOS = 100;
+    private static final int MINIMUM_AUDIOS = 150;
 
     private static final int HTTP_CLIENT_TIMEOUT = 30_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;

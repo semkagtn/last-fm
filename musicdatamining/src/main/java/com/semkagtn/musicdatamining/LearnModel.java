@@ -16,6 +16,7 @@ import weka.classifiers.trees.J48;
 import weka.classifiers.trees.M5P;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
+import weka.core.SelectedTag;
 import weka.filters.Filter;
 import weka.filters.unsupervised.instance.Normalize;
 
@@ -27,7 +28,7 @@ import java.util.Random;
  */
 public class LearnModel {
 
-    private static final String TRAINING_SET_FILE_NAME = "trainingSetArtistsTags.arff";
+    private static final String TRAINING_SET_FILE_NAME = "all.arff";
     private static final int K = 10;
 
     public static void main(String[] args) throws Exception {
@@ -37,7 +38,7 @@ public class LearnModel {
         normalize.setInputFormat(trainingSet);
         trainingSet = Filter.useFilter(trainingSet, normalize);
 
-        Classifier classifier = new LibSVM();
+        Classifier classifier = new RandomForest();
 
         Evaluation evaluation = new Evaluation(trainingSet);
         evaluation.crossValidateModel(classifier, trainingSet, K, new Random());

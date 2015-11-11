@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class CollectData {
 
-    private static final int THREAD_COUNT = 4;
+    private static final int THREAD_COUNT = 3;
 
     public static void main(String[] args) throws InterruptedException {
         List<Thread> threads = new ArrayList<>();
@@ -22,7 +22,7 @@ public class CollectData {
             String vkAccessToken = VkAccessTokens.get(i);
 
             Thread thread = new Thread(() -> {
-                Logger logger = LoggerUtils.getUniqueFileLogger();
+                Logger logger = null/*LoggerUtils.getUniqueFileLogger()*/;
                 DataCollector dataCollector = new DataCollector(lastFmApiKey, vkAccessToken, logger);
                 dataCollector.collect();
             });

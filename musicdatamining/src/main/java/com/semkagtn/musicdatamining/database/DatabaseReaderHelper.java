@@ -1,6 +1,7 @@
 package com.semkagtn.musicdatamining.database;
 
 import com.semkagtn.musicdatamining.Artists;
+import com.semkagtn.musicdatamining.GenresDict;
 import com.semkagtn.musicdatamining.Tags;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -60,6 +61,16 @@ public class DatabaseReaderHelper {
                 "GROUP BY artists.id ORDER BY count DESC LIMIT " + top;
         SQLQuery sqlQuery = session.createSQLQuery(query)
                 .addEntity(Artists.class);
+        return sqlQuery.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<GenresDict> topGenres(int top) {
+        String query = "SELECT genre_id, genre_name, COUNT(*) AS count " +
+                "FROM tracks JOIN genres_dict ON tracks.genre = genres_dict.genre_id " +
+                "GROUP BY genre_id ORDER BY count DESC LIMIT " + top;
+        SQLQuery sqlQuery = session.createSQLQuery(query)
+                .addEntity(GenresDict.class);
         return sqlQuery.list();
     }
 }
