@@ -1,9 +1,7 @@
 package com.semkagtn.musicdatamining.lastfmapi;
 
 import com.semkagtn.musicdatamining.httpclient.HttpClient;
-import com.semkagtn.musicdatamining.lastfmapi.response.ArtistGetInfoResponse;
-import com.semkagtn.musicdatamining.lastfmapi.response.BaseLastFmResponse;
-import com.semkagtn.musicdatamining.lastfmapi.response.TrackGetInfoResponse;
+import com.semkagtn.musicdatamining.lastfmapi.model.response.*;
 import com.semkagtn.musicdatamining.utils.JsonUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -20,6 +18,10 @@ public class LastFmApi {
 
     private static final String ARTIST_GET_INFO = "artist.getInfo";
     private static final String TRACK_GET_INFO = "track.getInfo";
+    private static final String USER_GET_INFO = "user.getInfo";
+    private static final String USER_GET_TOP_TRACKS = "user.getTopTracks";
+    private static final String USER_GET_TOP_ARTISTS = "user.getTopArtists";
+    private static final String USER_GET_FRIENDS = "user.getFriends";
 
     private HttpClient client;
     private String apiKey;
@@ -57,5 +59,29 @@ public class LastFmApi {
         parameters.add(new BasicNameValuePair("artist", artist));
         parameters.add(new BasicNameValuePair("autocorrect", "1"));
         return call(TRACK_GET_INFO, parameters, TrackGetInfoResponse.class);
+    }
+
+    public UserGetInfoResponse userGetInfo(String user) {
+        List<NameValuePair> parameters = new ArrayList<>();
+        parameters.add(new BasicNameValuePair("user", user));
+        return call(USER_GET_INFO, parameters, UserGetInfoResponse.class);
+    }
+
+    public UserGetTopTracksResponse userGetTopTracks(String user) {
+        List<NameValuePair> parameters = new ArrayList<>();
+        parameters.add(new BasicNameValuePair("user", user));
+        return call(USER_GET_TOP_TRACKS, parameters, UserGetTopTracksResponse.class);
+    }
+
+    public UserGetTopArtistsResponse userGetTopArtists(String user) {
+        List<NameValuePair> parameters = new ArrayList<>();
+        parameters.add(new BasicNameValuePair("user", user));
+        return call(USER_GET_TOP_ARTISTS, parameters, UserGetTopArtistsResponse.class);
+    }
+
+    public UserGetFriendsResponse userGetFriends(String user) {
+        List<NameValuePair> parameters = new ArrayList<>();
+        parameters.add(new BasicNameValuePair("user", user));
+        return call(USER_GET_FRIENDS, parameters, UserGetFriendsResponse.class);
     }
 }

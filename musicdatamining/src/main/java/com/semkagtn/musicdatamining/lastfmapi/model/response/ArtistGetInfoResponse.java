@@ -1,6 +1,6 @@
-package com.semkagtn.musicdatamining.lastfmapi.response;
+package com.semkagtn.musicdatamining.lastfmapi.model.response;
 
-import com.semkagtn.musicdatamining.utils.JsonUtils;
+import com.semkagtn.musicdatamining.lastfmapi.model.item.ArtistItem;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -13,10 +13,5 @@ public class ArtistGetInfoResponse extends BaseLastFmResponse {
 
     public ArtistItem getArtist() {
         return artist;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.toJson(this);
     }
 }

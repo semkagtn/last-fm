@@ -8,9 +8,9 @@ import java.util.function.Function;
 /**
  * Created by semkagtn on 05.11.15.
  */
-public class NominalFeature extends Feature<String> {
+public class NominalFeature<X> extends Feature<X, String> {
 
-    public NominalFeature(Attribute attribute, Function<Users, String> function) {
+    public NominalFeature(Attribute attribute, Function<X, String> function) {
         super(attribute, function);
     }
 

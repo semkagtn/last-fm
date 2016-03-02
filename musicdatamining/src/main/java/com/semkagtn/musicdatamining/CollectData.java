@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class CollectData {
 
-    private static final int THREAD_COUNT = 3;
+    private static final int THREAD_COUNT = 5;
 
     public static void main(String[] args) throws InterruptedException {
         List<Thread> threads = new ArrayList<>();

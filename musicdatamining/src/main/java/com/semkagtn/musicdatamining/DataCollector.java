@@ -5,7 +5,11 @@ import com.semkagtn.musicdatamining.database.EntityConverter;
 import com.semkagtn.musicdatamining.httpclient.HttpClient;
 import com.semkagtn.musicdatamining.httpclient.HttpClientConfig;
 import com.semkagtn.musicdatamining.lastfmapi.LastFmApi;
-import com.semkagtn.musicdatamining.lastfmapi.response.*;
+import com.semkagtn.musicdatamining.lastfmapi.model.item.ArtistItem;
+import com.semkagtn.musicdatamining.lastfmapi.model.item.TagItem;
+import com.semkagtn.musicdatamining.lastfmapi.model.item.TrackItem;
+import com.semkagtn.musicdatamining.lastfmapi.model.response.ArtistGetInfoResponse;
+import com.semkagtn.musicdatamining.lastfmapi.model.response.TrackGetInfoResponse;
 import com.semkagtn.musicdatamining.vkapi.VkApi;
 import com.semkagtn.musicdatamining.vkapi.audioextractor.CompositeVkAudioExtractor;
 import com.semkagtn.musicdatamining.vkapi.audioextractor.PlaylistVkAudioExtractor;
@@ -29,16 +33,16 @@ import static com.semkagtn.musicdatamining.vkapi.userwalker.UserPredicates.*;
  */
 public class DataCollector {
 
-    private static final int USER_AMOUNT = 35;
+    private static final int USER_AMOUNT = 200;
+
     private static final int AUDIOS_REQUEST_LIMIT = 250;
     private static final int MINIMUM_AUDIOS = 150;
+    private static final int USER_WALKER_DEPTH = 2;
+    private static final int USER_WALKER_FRIENDS_LIMIT = 3;
 
     private static final int HTTP_CLIENT_TIMEOUT = 30_000;
     private static final int HTTP_CLIENT_MAX_REPEAT_TIMES = 3;
     private static final boolean HTTP_CLIENT_LOGGER_ENABLED = true;
-
-    private static final int USER_WALKER_DEPTH = 2;
-    private static final int USER_WALKER_FRIENDS_LIMIT = 3;
 
     private LastFmApi lastFmApi;
     private VkUserWalker userWalker;
@@ -58,7 +62,7 @@ public class DataCollector {
         }
 
         lastFmApi = new LastFmApi(httpClient, lastFmApiKey);
-        VkApi vkApi = new VkApi(httpClient, vkAccessToken);
+        VkApi vkApi = VkApi.official(httpClient, vkAccessToken);
 
         userWalker = new PredicateVkUserWalker(
                 new RandomRecursiveVkUserWalker(USER_WALKER_DEPTH, USER_WALKER_FRIENDS_LIMIT, vkApi),

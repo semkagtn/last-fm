@@ -1,34 +1,34 @@
-package com.semkagtn.musicdatamining.lastfmapi.response;
+package com.semkagtn.musicdatamining.lastfmapi.model.item;
 
 import com.semkagtn.musicdatamining.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- * Created by semkagtn on 03.09.15.
+ * Created by semkagtn on 08.02.16.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TrackItem {
+public class LastFmUserItem {
+
+    @JsonProperty("gender")
+    private String gender;
 
     @JsonProperty("name")
     private String name;
 
-    @JsonProperty("artist")
-    private ArtistItem artist;
+    @JsonProperty("country")
+    private String country;
 
-    @JsonProperty("toptags")
-    private TagsItem topTags;
+    public String getGender() {
+        return gender;
+    }
 
     public String getName() {
         return name;
     }
 
-    public ArtistItem getArtist() {
-        return artist;
-    }
-
-    public TagsItem getTopTags() {
-        return topTags;
+    public String getCountry() {
+        return country;
     }
 
     @Override

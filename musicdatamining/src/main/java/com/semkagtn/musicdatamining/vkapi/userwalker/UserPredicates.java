@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 public class UserPredicates {
 
     public static Predicate<UserItem> hasAge() {
-        return user -> user.getBdate() != null && user.getBdate().split("\\\\.").length == 3;
+        return user -> user.getBdate() != null && user.getBdate().split("\\.").length == 3;
     }
 
     public static Predicate<UserItem> hasGender() {

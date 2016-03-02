@@ -9,12 +9,12 @@ import java.util.function.Function;
 /**
  * Created by semkagtn on 04.11.15.
  */
-public class MultiFeature<T> {
+public class MultiFeature<X, T> {
 
     private List<Attribute> attributes;
-    private Function<Users, List<T>> function;
+    private Function<X, List<T>> function;
 
-    public MultiFeature(List<Attribute> attributes, Function<Users, List<T>> function) {
+    public MultiFeature(List<Attribute> attributes, Function<X, List<T>> function) {
         this.attributes = attributes;
         this.function = function;
     }
@@ -23,7 +23,7 @@ public class MultiFeature<T> {
         return attributes;
     }
 
-    public List<T> calculate(Users user) {
+    public List<T> calculate(X user) {
         return function.apply(user);
     }
 }

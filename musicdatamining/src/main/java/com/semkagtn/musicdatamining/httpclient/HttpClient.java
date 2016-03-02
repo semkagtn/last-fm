@@ -31,6 +31,7 @@ public class HttpClient {
     public HttpClient(HttpClientConfig config) {
         this.client = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setProxy(new HttpHost("rain.ifmo.ru", 3128, "http"))
                         .setSocketTimeout(config.getTimeout())
                         .setConnectTimeout(config.getTimeout())
                         .setCookieSpec(CookieSpecs.IGNORE_COOKIES)

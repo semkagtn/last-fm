@@ -28,6 +28,9 @@ public class AudioItem {
     @JsonProperty("date")
     private long date;
 
+    @JsonProperty("owner_id")
+    private long ownerId;
+
     public String getArtist() {
         return artist;
     }
@@ -50,6 +53,10 @@ public class AudioItem {
 
     public long getDate() {
         return date;
+    }
+
+    public long getOwnerId() {
+        return ownerId;
     }
 
     @Override

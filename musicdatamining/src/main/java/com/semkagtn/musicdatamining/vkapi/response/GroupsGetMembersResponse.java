@@ -5,23 +5,16 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- * Created by semkagtn on 12.09.15.
+ * Created by semkagtn on 24.02.16.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CountersItem {
+public class GroupsGetMembersResponse extends BaseVkResponse {
 
-    @JsonProperty("audios")
-    private Integer audios;
+    @JsonProperty("response")
+    private IdsList response;
 
-    @JsonProperty("friends")
-    private Integer friends;
-
-    public Integer getAudios() {
-        return audios;
-    }
-
-    public Integer getFriends() {
-        return friends;
+    public IdsList getResponse() {
+        return response;
     }
 
     @Override

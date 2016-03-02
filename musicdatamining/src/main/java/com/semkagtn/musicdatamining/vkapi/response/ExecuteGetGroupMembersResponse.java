@@ -1,20 +1,22 @@
-package com.semkagtn.musicdatamining.lastfmapi.response;
+package com.semkagtn.musicdatamining.vkapi.response;
 
 import com.semkagtn.musicdatamining.utils.JsonUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.List;
+
 /**
- * Created by semkagtn on 02.09.15.
+ * Created by semkagtn on 24.02.16.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TagItem {
+public class ExecuteGetGroupMembersResponse extends BaseVkResponse {
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("response")
+    private List<Long> response;
 
-    public String getName() {
-        return name;
+    public List<Long> getResponse() {
+        return response;
     }
 
     @Override

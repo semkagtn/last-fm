@@ -1,6 +1,7 @@
 package com.semkagtn.musicdatamining.utils;
 
 import org.joda.time.DateTime;
+import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -30,7 +31,7 @@ public class DateTimeUtils {
         }
         DateTime birthDay = new DateTime(unixTime);
         DateTime now = new DateTime();
-        return now.getYear() - birthDay.getYear();
+        return Years.yearsBetween(birthDay, now).getYears();
     }
 
     private DateTimeUtils() {

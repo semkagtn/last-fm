@@ -9,13 +9,21 @@
         <property name="hibernate.connection.url">jdbc:mysql://localhost/music_data_mining</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <mapping class="com.semkagtn.musicdatamining.TracksTags" />
+        <mapping class="com.semkagtn.musicdatamining.DTracksUsers" />
+        <mapping class="com.semkagtn.musicdatamining.DUsersTracks" />
+        <mapping class="com.semkagtn.musicdatamining.LastfmTopTracks" />
         <mapping class="com.semkagtn.musicdatamining.GenresDict" />
         <mapping class="com.semkagtn.musicdatamining.ArtistsTags" />
-        <mapping class="com.semkagtn.musicdatamining.TracksTags" />
+        <mapping class="com.semkagtn.musicdatamining.LastfmTracks" />
+        <mapping class="com.semkagtn.musicdatamining.DUsers" />
         <mapping class="com.semkagtn.musicdatamining.UsersTracks" />
+        <mapping class="com.semkagtn.musicdatamining.LastfmArtists" />
         <mapping class="com.semkagtn.musicdatamining.Users" />
         <mapping class="com.semkagtn.musicdatamining.Artists" />
         <mapping class="com.semkagtn.musicdatamining.Tags" />
+        <mapping class="com.semkagtn.musicdatamining.DTracks" />
+        <mapping class="com.semkagtn.musicdatamining.LastfmUsers" />
         <mapping class="com.semkagtn.musicdatamining.Tracks" />
     </session-factory>
 </hibernate-configuration>

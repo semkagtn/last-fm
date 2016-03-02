@@ -16,12 +16,26 @@ public class VkError {
     @JsonProperty("error_msg")
     private String errorMsg;
 
+    @JsonProperty("captcha_sid")
+    private String captchaSid;
+
+    @JsonProperty("captcha_img")
+    private String captchaImg;
+
     public int getErrorCode() {
         return errorCode;
     }
 
     public String getErrorMsg() {
         return errorMsg;
+    }
+
+    public String getCaptchaSid() {
+        return captchaSid;
+    }
+
+    public String getCaptchaImg() {
+        return captchaImg;
     }
 
     @Override

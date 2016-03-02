@@ -17,8 +17,10 @@ import weka.classifiers.trees.M5P;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.SelectedTag;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.CSVLoader;
 import weka.filters.Filter;
-import weka.filters.unsupervised.instance.Normalize;
+import weka.filters.unsupervised.attribute.Normalize;
 
 import java.io.File;
 import java.util.Random;
@@ -28,20 +30,26 @@ import java.util.Random;
  */
 public class LearnModel {
 
-    private static final String TRAINING_SET_FILE_NAME = "all.arff";
+    private static final String TRAINING_SET_FILE_NAME = "optimized-big-igain-l1-pca.csv";
+    private static final int Q = 1;
     private static final int K = 10;
 
     public static void main(String[] args) throws Exception {
-        Instances trainingSet = WekaUtils.readArffFile(new File(TRAINING_SET_FILE_NAME));
+        Instances trainingSet = WekaUtils.readFile(new File(TRAINING_SET_FILE_NAME), new CSVLoader());
+        System.out.println(trainingSet.numInstances());
+//        Filter normalize = new Normalize();
+//        normalize.setInputFormat(trainingSet);
+//        trainingSet = Filter.useFilter(trainingSet, normalize);
 
-        Filter normalize = new Normalize();
-        normalize.setInputFormat(trainingSet);
-        trainingSet = Filter.useFilter(trainingSet, normalize);
-
-        Classifier classifier = new RandomForest();
+        LibSVM classifier = new LibSVM();
+        classifier.setCacheSize(1024);
+        classifier.setNormalize(true);
+//        classifier.setShrinking(false);
 
         Evaluation evaluation = new Evaluation(trainingSet);
-        evaluation.crossValidateModel(classifier, trainingSet, K, new Random());
+        for (int i = 0; i < Q; i++) {
+            evaluation.crossValidateModel(classifier, trainingSet, K, new Random());
+        }
         System.out.println(evaluation.toSummaryString());
     }
 }

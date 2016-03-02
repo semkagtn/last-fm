@@ -11,8 +11,10 @@ import java.util.Random;
 public class VkAccessTokens {
 
     private static final String FILE_NAME = "vk-tokens.tokens";
+    private static final String UNOFFICIAL_FILE_NAME = "vk-unofficial-tokens.tokens";
 
     private static List<String> tokens = ResourceUtils.getFileLines(FILE_NAME);
+    private static String unofficialToken = ResourceUtils.getFileLines(UNOFFICIAL_FILE_NAME).get(0);
     private static Random random = new Random();
 
     private VkAccessTokens() {
@@ -26,5 +28,9 @@ public class VkAccessTokens {
     public static String getRandom() {
         int index = random.nextInt(tokens.size());
         return get(index);
+    }
+
+    public static String getUnofficialToken() {
+        return unofficialToken;
     }
 }

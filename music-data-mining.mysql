@@ -2,6 +2,7 @@ drop database music_data_mining;
 create database music_data_mining;
 use music_data_mining;
 
+# vk-lastfm
 
 create table users (
     id int not null primary key,
@@ -82,7 +83,78 @@ insert into genres_dict (genre_id, genre_name) values
     (21, 'Alternative'),
     (22, 'Electropop & Disco');
 
-
 create index users_tracks__user_id on users_tracks(user_id);
 create index artists_tags__artist_id on artists_tags(artist_id);
 create index tracks_tags__track_id on tracks_tags(track_id);
+
+# lastfm
+
+create table lastfm_artists (
+    id char(32) not null,
+    artist_name varchar(1024) not null,
+    primary key (id)
+);
+
+create table lastfm_tracks (
+    id char(32) not null,
+    artist_id char(32),
+    track_name varchar(1024) not null,
+    primary key (id),
+    foreign key (artist_id) references lastfm_artists (id)
+);
+
+create table lastfm_users (
+    id char(32) not null,
+    gender char(1) not null,
+    country varchar(1024),
+    primary key (id)
+);
+
+create table lastfm_top_tracks (
+    id int not null auto_increment,
+    user_id char(32) not null,
+    track_id char(32) not null,
+    playcount int not null,
+    primary key (id),
+    unique key (user_id, track_id)
+);
+
+create index lastfm_tracks__artist_id on lastfm_tracks(artist_id);
+
+# distributions 
+
+create table d_users (
+    id int not null,
+    birthday bigint,
+    gender enum('m', 'f'),
+    primary key (id)
+);
+
+create table d_tracks (
+    id char(32) not null,
+    artist_name varchar(1024) not null,
+    track_name varchar(1024) not null,
+    primary key (id)
+);
+
+create table d_users_tracks (
+    id int not null auto_increment,
+    user_id int not null,
+    track_id char(32) not null,
+    primary key (id),
+    foreign key (user_id) references d_users(id),
+    foreign key (track_id) references d_tracks(id)
+);
+create index d_users_tracks__user_id on d_users_tracks(user_id);
+
+create table d_tracks_users (
+    id int not null auto_increment,
+    track_id char(32) not null,
+    user_id int not null,
+    primary key (id),
+    unique key (track_id, user_id),
+    foreign key (track_id) references d_tracks(id),
+    foreign key (user_id) references d_users(id)
+);
+create index d_tracks_users__track_id on d_tracks_users(track_id);
+

@@ -8,9 +8,9 @@ import java.util.function.Function;
 /**
  * Created by semkagtn on 05.11.15.
  */
-public class NumericFeature extends Feature<Double> {
+public class NumericFeature<X> extends Feature<X, Double> {
 
-    public NumericFeature(Attribute attribute, Function<Users, Double> function) {
+    public NumericFeature(Attribute attribute, Function<X, Double> function) {
         super(attribute, function);
     }
 
